@@ -105,20 +105,12 @@
       background: #913c4c;
     }
 
-    button.feedback-no {
-      background: #7c3a4c;
-    }
-
     button.feedback-yes {
       background: #3e6b4f;
     }
 
-    button.correct {
-      min-height: 34px;
-      margin-top: 10px;
-      padding: 7px 12px;
-      background: #3e6b4f;
-      font-size: 12px;
+    button.feedback-no {
+      background: #7c3a4c;
     }
 
     button:disabled {
@@ -156,19 +148,19 @@
 
     .feedback-question-title {
       margin-bottom: 9px;
-      font-weight: bold;
       color: #2c3a54;
+      font-weight: bold;
     }
 
     .feedback-answer-buttons {
       display: flex;
-      gap: 8px;
       flex-wrap: wrap;
+      gap: 8px;
     }
 
-    .feedback-note {
-      margin-top: 8px;
-      color: #6d685f;
+    .feedback-status {
+      margin-top: 9px;
+      color: #625d55;
       font-size: 12px;
     }
 
@@ -306,9 +298,9 @@
     <h1>IBA Smart Book Search</h1>
 
     <div class="subtitle">
-      Text ya voice se SKU, book name, subject, class,
-      category aur publisher search karo.
-      Dictionary synonyms aur approved feedback automatically apply hote hain.
+      Search result sirf tab Trend sheet me save hoga jab aap
+      “Yes, result sahi hai” select karenge. Galat result ka data
+      Feedback sheet me save hoga.
     </div>
 
     <div id="databaseInfo" class="database-info">
@@ -334,6 +326,7 @@ concept physics"></textarea>
 
       <button
         id="searchButton"
+        type="button"
         onclick="runSearch()">
         Search Books
       </button>
@@ -341,6 +334,7 @@ concept physics"></textarea>
       <button
         id="voiceButton"
         class="voice"
+        type="button"
         onclick="startVoiceSearch()">
         🎤 Voice Search
       </button>
@@ -348,6 +342,7 @@ concept physics"></textarea>
       <button
         id="stopVoiceButton"
         class="secondary"
+        type="button"
         onclick="stopVoiceSearch()"
         disabled>
         Stop Voice
@@ -355,12 +350,14 @@ concept physics"></textarea>
 
       <button
         class="secondary"
+        type="button"
         onclick="clearSearch()">
         Clear
       </button>
 
       <button
         class="secondary"
+        type="button"
         onclick="loadDatabaseInfo()">
         Refresh Data
       </button>
@@ -378,7 +375,7 @@ concept physics"></textarea>
 
     <div class="modal">
 
-      <h2>Tell us the correct book</h2>
+      <h2>Kaunsi book aani chahiye?</h2>
 
       <div id="feedbackSearchLabel"></div>
 
@@ -395,7 +392,7 @@ concept physics"></textarea>
 
       <div class="form-group">
         <label for="expectedSku">
-          Expected SKU, if known
+          Expected SKU, agar pata ho
         </label>
 
         <input
@@ -418,12 +415,14 @@ concept physics"></textarea>
       <div class="buttons">
         <button
           id="submitFeedbackButton"
+          type="button"
           onclick="submitWrongFeedback()">
           Submit Feedback
         </button>
 
         <button
           class="secondary"
+          type="button"
           onclick="closeFeedbackModal()">
           Cancel
         </button>
@@ -434,14 +433,22 @@ concept physics"></textarea>
 
   <script>
     /*
-     * Apna existing Apps Script /exec URL yahan paste karo.
+     * Apna current Apps Script /exec URL yahan paste karo.
      */
     const API_URL =
       "https://script.google.com/macros/s/AKfycbx19Eyx1duAhPFxZNFCjo0tF-pXYaFeQXjjy3P6RKU-f_dRkBYYhqT9j-oTUM4ZgkoLxw/exec";
 
     let recognition = null;
     let voiceRunning = false;
+
     let activeFeedbackSearch = "";
+
+    /*
+     * Current search ki unique session information.
+     */
+    let currentSearchText = "";
+    let currentConfirmationId = "";
+    let currentSearchConfirmed = false;
 
     function escapeHtml(value) {
       return String(value ?? "")
@@ -456,6 +463,16 @@ concept physics"></textarea>
       return encodeURIComponent(
         String(value ?? "")
       );
+    }
+
+    function createConfirmationId() {
+      return [
+        "IBA",
+        Date.now(),
+        Math.random()
+          .toString(36)
+          .substring(2, 12)
+      ].join("_");
     }
 
     function setMessage(text, success) {
@@ -613,6 +630,14 @@ concept physics"></textarea>
         return;
       }
 
+      /*
+       * Har new search ke liye fresh confirmation ID.
+       */
+      currentSearchText = input;
+      currentConfirmationId =
+        createConfirmationId();
+      currentSearchConfirmed = false;
+
       setMessage("");
 
       button.disabled = true;
@@ -689,33 +714,43 @@ concept physics"></textarea>
             '<div class="feedback-question">' +
 
               '<div class="feedback-question-title">' +
-                "Kya aapko sahi search result mila?" +
+                "Kya aapko search output sahi mila?" +
               "</div>" +
 
               '<div class="feedback-answer-buttons">' +
 
-                '<button class="feedback-yes" ' +
-                  'onclick="handleRelevantYes(' +
+                '<button ' +
+                  'id="yesButton_' +
+                    encodedQuery +
+                  '" ' +
+                  'class="feedback-yes" ' +
+                  'type="button" ' +
+                  'onclick="confirmRelevantResult(' +
                     "'" +
                     encodedQuery +
                     "'" +
-                  ')">' +
+                  ', this)">' +
                   "Yes, result sahi hai" +
                 "</button>" +
 
-                '<button class="feedback-no" ' +
+                '<button ' +
+                  'class="feedback-no" ' +
+                  'type="button" ' +
                   'onclick="openFeedbackModal(' +
                     "'" +
                     encodedQuery +
                     "'" +
                   ')">' +
-                  "No, mujhe doosri book chahiye" +
+                  "No, result galat hai" +
                 "</button>" +
 
               "</div>" +
 
-              '<div class="feedback-note">' +
-                "Yes select karne ke baad neeche correct book par green button dabao." +
+              '<div ' +
+                'id="feedbackStatus_' +
+                  encodedQuery +
+                '" ' +
+                'class="feedback-status">' +
               "</div>" +
 
             "</div>";
@@ -727,7 +762,7 @@ concept physics"></textarea>
                   "No relevant match found" +
                 "</div>" +
                 '<div class="detail">' +
-                  "No button click karke expected book name ya SKU batao." +
+                  "No button click karke expected book batao." +
                 "</div>" +
               "</div>";
 
@@ -768,20 +803,6 @@ concept physics"></textarea>
                   "%" +
                 "</div>" +
 
-                '<button class="correct" ' +
-                  'onclick="markCorrectBook(' +
-                    "'" +
-                    encodedQuery +
-                    "'," +
-                    "'" +
-                    encodeJsValue(
-                      book.sku
-                    ) +
-                    "'" +
-                  ')">' +
-                  "✓ This is the correct book" +
-                "</button>" +
-
               "</div>";
           });
         }
@@ -790,75 +811,101 @@ concept physics"></textarea>
       resultsBox.innerHTML = html;
     }
 
-    function handleRelevantYes(
-      encodedSearch
-    ) {
-      const searchText =
-        decodeURIComponent(
-          encodedSearch
-        );
-
-      setMessage(
-        'Search "' +
-        searchText +
-        '" ke liye neeche correct book ka green button select karo.',
-        true
-      );
-
-      window.scrollBy({
-        top: 220,
-        behavior: "smooth"
-      });
-    }
-
-    async function markCorrectBook(
+    /**
+     * Yes button:
+     * Trend sheet me search aur output save karega.
+     */
+    async function confirmRelevantResult(
       encodedSearch,
-      encodedSku
+      clickedButton
     ) {
-      const searchText =
+      const query =
         decodeURIComponent(
           encodedSearch
         );
 
-      const sku =
-        decodeURIComponent(
-          encodedSku
+      const statusElement =
+        document.getElementById(
+          "feedbackStatus_" +
+          encodedSearch
         );
+
+      if (currentSearchConfirmed) {
+        statusElement.textContent =
+          "Trend sheet me pehle hi save ho chuka hai.";
+
+        clickedButton.disabled = true;
+        clickedButton.textContent =
+          "✓ Saved in Trend";
+
+        return;
+      }
+
+      clickedButton.disabled = true;
+      clickedButton.innerHTML =
+        '<span class="loader"></span>Saving...';
+
+      statusElement.textContent =
+        "Trend sheet me save ho raha hai...";
 
       try {
-        setMessage(
-          "Saving correct-book feedback...",
-          true
-        );
-
         const response =
           await jsonpRequest({
-            action: "feedback",
-            feedbackType: "correct",
-            searchText: searchText,
-            selectedSku: sku
+            action: "confirm",
+
+            /*
+             * Complete textarea input bhejna zaroori hai,
+             * especially multi-line searches ke liye.
+             */
+            q: currentSearchText || query,
+
+            confirmationId:
+              currentConfirmationId
           });
 
         if (!response.success) {
           throw new Error(
             response.message ||
-            "Feedback save failed."
+            "Trend save failed."
           );
         }
 
+        currentSearchConfirmed = true;
+
+        clickedButton.disabled = true;
+        clickedButton.textContent =
+          "✓ Saved in Trend";
+
+        statusElement.textContent =
+          response.alreadySaved
+            ? "Trend sheet me pehle hi save tha."
+            : "Search aur output Trend sheet me successfully save ho gaya.";
+
         setMessage(
-          "Correct book feedback successfully saved.",
+          "Result confirmed. Trend sheet me data save ho gaya.",
           true
         );
 
       } catch (error) {
+        clickedButton.disabled = false;
+        clickedButton.textContent =
+          "Yes, result sahi hai";
+
+        statusElement.textContent =
+          "Trend save error: " +
+          error.message;
+
         setMessage(
-          "Feedback error: " +
+          "Trend save error: " +
           error.message
         );
       }
     }
 
+    /**
+     * No button:
+     * Feedback form open karega.
+     */
     function openFeedbackModal(
       encodedSearch
     ) {
@@ -921,6 +968,11 @@ concept physics"></textarea>
       activeFeedbackSearch = "";
     }
 
+    /**
+     * No feedback submit:
+     * Sirf Feedback sheet me save hoga.
+     * Trend me kuch save nahi hoga.
+     */
     async function submitWrongFeedback() {
       const expectedBook =
         document
@@ -966,8 +1018,8 @@ concept physics"></textarea>
       }
 
       button.disabled = true;
-      button.textContent =
-        "Saving...";
+      button.innerHTML =
+        '<span class="loader"></span>Saving...';
 
       try {
         const response =
@@ -993,7 +1045,7 @@ concept physics"></textarea>
         closeFeedbackModal();
 
         setMessage(
-          "Feedback saved. Dictionary me pending training suggestion add ho gayi hai.",
+          "Feedback sheet me data successfully save ho gaya.",
           true
         );
 
@@ -1173,6 +1225,11 @@ concept physics"></textarea>
           "results"
         )
         .innerHTML = "";
+
+      currentSearchText = "";
+      currentConfirmationId = "";
+      currentSearchConfirmed = false;
+      activeFeedbackSearch = "";
 
       setMessage("");
     }
