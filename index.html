@@ -105,8 +105,12 @@
       background: #913c4c;
     }
 
-    button.feedback {
+    button.feedback-no {
       background: #7c3a4c;
+    }
+
+    button.feedback-yes {
+      background: #3e6b4f;
     }
 
     button.correct {
@@ -142,8 +146,30 @@
       font-weight: bold;
     }
 
-    .query-feedback {
+    .feedback-question {
+      margin-top: 10px;
+      padding: 14px;
+      border: 1px solid #dfd7c8;
+      border-radius: 7px;
+      background: #fffaf2;
+    }
+
+    .feedback-question-title {
+      margin-bottom: 9px;
+      font-weight: bold;
+      color: #2c3a54;
+    }
+
+    .feedback-answer-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .feedback-note {
       margin-top: 8px;
+      color: #6d685f;
+      font-size: 12px;
     }
 
     .card {
@@ -261,11 +287,13 @@
         font-size: 28px;
       }
 
-      .buttons {
+      .buttons,
+      .feedback-answer-buttons {
         flex-direction: column;
       }
 
-      .buttons button {
+      .buttons button,
+      .feedback-answer-buttons button {
         width: 100%;
       }
     }
@@ -406,7 +434,7 @@ concept physics"></textarea>
 
   <script>
     /*
-     * Paste your current Apps Script /exec URL.
+     * Apna existing Apps Script /exec URL yahan paste karo.
      */
     const API_URL =
       "https://script.google.com/macros/s/AKfycbx19Eyx1duAhPFxZNFCjo0tF-pXYaFeQXjjy3P6RKU-f_dRkBYYhqT9j-oTUM4ZgkoLxw/exec";
@@ -422,6 +450,12 @@ concept physics"></textarea>
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+    }
+
+    function encodeJsValue(value) {
+      return encodeURIComponent(
+        String(value ?? "")
+      );
     }
 
     function setMessage(text, success) {
@@ -637,6 +671,11 @@ concept physics"></textarea>
           const matches =
             queryResult.matches || [];
 
+          const encodedQuery =
+            encodeJsValue(
+              queryResult.query
+            );
+
           html +=
             '<div class="query-heading">' +
               'Search: "' +
@@ -647,17 +686,38 @@ concept physics"></textarea>
             "</div>";
 
           html +=
-            '<div class="query-feedback">' +
-              '<button class="feedback" ' +
-                'onclick="openFeedbackModal(' +
-                  "'" +
-                  encodeURIComponent(
-                    queryResult.query
-                  ) +
-                  "'" +
-                ')">' +
-                "Results are not relevant" +
-              "</button>" +
+            '<div class="feedback-question">' +
+
+              '<div class="feedback-question-title">' +
+                "Kya aapko sahi search result mila?" +
+              "</div>" +
+
+              '<div class="feedback-answer-buttons">' +
+
+                '<button class="feedback-yes" ' +
+                  'onclick="handleRelevantYes(' +
+                    "'" +
+                    encodedQuery +
+                    "'" +
+                  ')">' +
+                  "Yes, result sahi hai" +
+                "</button>" +
+
+                '<button class="feedback-no" ' +
+                  'onclick="openFeedbackModal(' +
+                    "'" +
+                    encodedQuery +
+                    "'" +
+                  ')">' +
+                  "No, mujhe doosri book chahiye" +
+                "</button>" +
+
+              "</div>" +
+
+              '<div class="feedback-note">' +
+                "Yes select karne ke baad neeche correct book par green button dabao." +
+              "</div>" +
+
             "</div>";
 
           if (!matches.length) {
@@ -667,7 +727,7 @@ concept physics"></textarea>
                   "No relevant match found" +
                 "</div>" +
                 '<div class="detail">' +
-                  "Use the feedback button to tell us which book should appear." +
+                  "No button click karke expected book name ya SKU batao." +
                 "</div>" +
               "</div>";
 
@@ -711,12 +771,10 @@ concept physics"></textarea>
                 '<button class="correct" ' +
                   'onclick="markCorrectBook(' +
                     "'" +
-                    encodeURIComponent(
-                      queryResult.query
-                    ) +
+                    encodedQuery +
                     "'," +
                     "'" +
-                    encodeURIComponent(
+                    encodeJsValue(
                       book.sku
                     ) +
                     "'" +
@@ -730,6 +788,27 @@ concept physics"></textarea>
       );
 
       resultsBox.innerHTML = html;
+    }
+
+    function handleRelevantYes(
+      encodedSearch
+    ) {
+      const searchText =
+        decodeURIComponent(
+          encodedSearch
+        );
+
+      setMessage(
+        'Search "' +
+        searchText +
+        '" ke liye neeche correct book ka green button select karo.',
+        true
+      );
+
+      window.scrollBy({
+        top: 220,
+        behavior: "smooth"
+      });
     }
 
     async function markCorrectBook(
@@ -768,7 +847,7 @@ concept physics"></textarea>
         }
 
         setMessage(
-          "Correct-book feedback saved.",
+          "Correct book feedback successfully saved.",
           true
         );
 
@@ -821,6 +900,14 @@ concept physics"></textarea>
         )
         .classList
         .add("show");
+
+      setTimeout(function() {
+        document
+          .getElementById(
+            "expectedBook"
+          )
+          .focus();
+      }, 100);
     }
 
     function closeFeedbackModal() {
@@ -864,9 +951,7 @@ concept physics"></textarea>
           "submitFeedbackButton"
         );
 
-      if (
-        !activeFeedbackSearch
-      ) {
+      if (!activeFeedbackSearch) {
         return;
       }
 
@@ -1051,7 +1136,13 @@ concept physics"></textarea>
         )
         .value = "";
 
-      recognition.start();
+      try {
+        recognition.start();
+      } catch (error) {
+        setMessage(
+          "Voice Search dobara click karne se pehle ek second wait karo."
+        );
+      }
     }
 
     function stopVoiceSearch() {
@@ -1064,6 +1155,13 @@ concept physics"></textarea>
     }
 
     function clearSearch() {
+      if (
+        recognition &&
+        voiceRunning
+      ) {
+        recognition.stop();
+      }
+
       document
         .getElementById(
           "searchInput"
