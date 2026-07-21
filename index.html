@@ -290,43 +290,34 @@
       }
     }
 
-    /* =========================
-       PHOTO SEARCH
-       ========================= */
 
+    /* Photo-search additions. */
     .photo-panel {
       margin-top: 16px;
       padding: 16px;
-      border: 1px solid #dfd7c8;
+      border: 1px solid #d9d1c2;
       border-radius: 8px;
       background: #fffaf2;
     }
 
-    .photo-panel-title {
-      margin: 0 0 5px;
+    .photo-title {
+      margin-bottom: 6px;
       color: #2c3a54;
-      font-size: 18px;
       font-weight: bold;
+      font-size: 17px;
     }
 
-    .photo-panel-help {
+    .photo-help {
       margin-bottom: 12px;
       color: #625d55;
       font-size: 13px;
       line-height: 1.5;
     }
 
-    .photo-input {
-      display: none;
-    }
-
     .photo-preview-wrap {
       display: none;
-      margin-top: 14px;
-      padding: 12px;
-      border: 1px dashed #c9bfaf;
-      border-radius: 7px;
-      background: #ffffff;
+      margin-top: 13px;
+      text-align: center;
     }
 
     .photo-preview-wrap.show {
@@ -334,86 +325,40 @@
     }
 
     .photo-preview {
-      display: block;
-      width: 100%;
-      max-width: 430px;
+      max-width: 100%;
       max-height: 430px;
-      margin: 0 auto;
-      object-fit: contain;
-      border-radius: 6px;
-      background: #f4f4f4;
-    }
-
-    .photo-meta {
-      margin-top: 10px;
-      color: #625d55;
-      font-size: 12px;
-      line-height: 1.55;
-      overflow-wrap: anywhere;
+      border: 1px solid #ddd4c5;
+      border-radius: 8px;
+      background: white;
     }
 
     .photo-progress {
-      display: none;
+      min-height: 20px;
+      margin-top: 10px;
+      color: #625d55;
+      font-size: 13px;
+    }
+
+    .photo-data-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
       margin-top: 12px;
-      padding: 11px 13px;
-      border-radius: 6px;
-      background: #edeff3;
-      color: #2c3a54;
-      font-size: 13px;
     }
 
-    .photo-progress.show {
-      display: block;
+    .photo-data-grid .full-width {
+      grid-column: 1 / -1;
     }
 
-    .photo-progress-bar {
-      height: 8px;
-      margin-top: 8px;
-      overflow: hidden;
-      border-radius: 99px;
-      background: #d8dce4;
-    }
+    @media (max-width: 650px) {
+      .photo-data-grid {
+        grid-template-columns: 1fr;
+      }
 
-    .photo-progress-fill {
-      width: 0;
-      height: 100%;
-      border-radius: inherit;
-      background: #2c3a54;
-      transition: width .2s ease;
+      .photo-data-grid .full-width {
+        grid-column: auto;
+      }
     }
-
-    .ocr-output {
-      display: none;
-      margin-top: 14px;
-    }
-
-    .ocr-output.show {
-      display: block;
-    }
-
-    .ocr-output textarea {
-      min-height: 115px;
-      font-family: Arial, sans-serif;
-    }
-
-    .barcode-result {
-      margin-top: 9px;
-      padding: 9px 11px;
-      border-radius: 6px;
-      background: #f1f6f2;
-      color: #31533e;
-      font-size: 13px;
-      overflow-wrap: anywhere;
-    }
-
-    button.photo {
-      background: #73532d;
-    }
-
-    button.photo-process {
-      background: #3f6173;
-    }
-
   </style>
 </head>
 
@@ -490,34 +435,25 @@ concept physics"></textarea>
     </div>
 
 
+
     <div class="photo-panel">
-      <div class="photo-panel-title">
-        📷 Search by Book Photo
+      <div class="photo-title">📷 Search by Book Photo</div>
+
+      <div class="photo-help">
+        Front cover, back cover ya barcode ki clear photo select karo.
+        Image browser ke andar process hogi. OCR text edit karke search bhi kar sakte ho.
       </div>
 
-      <div class="photo-panel-help">
-        Front cover, back cover, title page, or barcode ka clear photo upload karein.
-        Image browser me process hogi. OCR/barcode se nikla text aap edit bhi kar sakte hain.
-      </div>
+      <input
+        id="photoInput"
+        type="file"
+        accept="image/*"
+        capture="environment"
+        onchange="handlePhotoSelection(event)">
 
       <div class="buttons">
         <button
-          class="photo"
-          type="button"
-          onclick="document.getElementById('photoFileInput').click()">
-          Upload Photo
-        </button>
-
-        <button
-          class="photo"
-          type="button"
-          onclick="document.getElementById('cameraFileInput').click()">
-          Open Camera
-        </button>
-
-        <button
           id="processPhotoButton"
-          class="photo-process"
           type="button"
           onclick="processSelectedPhoto()"
           disabled>
@@ -527,76 +463,57 @@ concept physics"></textarea>
         <button
           class="secondary"
           type="button"
-          onclick="resetPhotoSearch()">
-          Remove Photo
+          onclick="clearPhotoSearch()">
+          Clear Photo
         </button>
       </div>
 
-      <input
-        id="photoFileInput"
-        class="photo-input"
-        type="file"
-        accept="image/*"
-        onchange="handlePhotoSelection(event)">
-
-      <input
-        id="cameraFileInput"
-        class="photo-input"
-        type="file"
-        accept="image/*"
-        capture="environment"
-        onchange="handlePhotoSelection(event)">
-
-      <div id="photoPreviewWrap" class="photo-preview-wrap">
+      <div
+        id="photoPreviewWrap"
+        class="photo-preview-wrap">
         <img
           id="photoPreview"
           class="photo-preview"
-          alt="Selected book photo">
-
-        <div id="photoMeta" class="photo-meta"></div>
+          alt="Selected book preview">
       </div>
 
-      <div id="photoProgress" class="photo-progress">
-        <div id="photoProgressText">Preparing photo...</div>
+      <div id="photoProgress" class="photo-progress"></div>
 
-        <div class="photo-progress-bar">
-          <div
-            id="photoProgressFill"
-            class="photo-progress-fill">
-          </div>
+      <div class="photo-data-grid">
+        <div class="full-width">
+          <label class="label" for="photoOcrText">Detected OCR text</label>
+          <textarea
+            id="photoOcrText"
+            placeholder="Photo process hone ke baad detected text yahan aayega. Aap isko edit kar sakte ho."></textarea>
+        </div>
+
+        <div>
+          <label class="label" for="photoBarcode">Detected barcode / ISBN</label>
+          <input
+            id="photoBarcode"
+            type="text"
+            placeholder="Barcode not detected">
+        </div>
+
+        <div>
+          <label class="label" for="photoFinalQuery">Final search query</label>
+          <input
+            id="photoFinalQuery"
+            type="text"
+            placeholder="OCR text or barcode">
         </div>
       </div>
 
-      <div id="ocrOutput" class="ocr-output">
-        <label class="label" for="ocrText">
-          Text detected from photo
-        </label>
-
-        <textarea
-          id="ocrText"
-          placeholder="OCR text will appear here. You may correct it before searching."></textarea>
-
-        <div id="barcodeResult" class="barcode-result">
-          Barcode / ISBN: Not detected
-        </div>
-
-        <div class="buttons">
-          <button
-            type="button"
-            onclick="searchUsingDetectedText()">
-            Search Using This Text
-          </button>
-
-          <button
-            class="secondary"
-            type="button"
-            onclick="copyOcrToMainSearch()">
-            Copy to Main Search
-          </button>
-        </div>
+      <div class="buttons">
+        <button
+          id="searchPhotoTextButton"
+          type="button"
+          onclick="searchUsingPhotoText()"
+          disabled>
+          Search Using Detected Text
+        </button>
       </div>
     </div>
-
 
     <div id="message" class="message"></div>
     <div id="results"></div>
@@ -666,9 +583,8 @@ concept physics"></textarea>
   </div>
 
 
-  <!-- Free client-side OCR and barcode libraries -->
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"></script>
 
   <script>
     /*
@@ -689,887 +605,11 @@ concept physics"></textarea>
     let currentConfirmationId = "";
     let currentSearchConfirmed = false;
 
-
-    /*
-     * Photo-search state. Image itself backend ko send nahi hoti.
-     * Sirf OCR/barcode metadata API parameters me bheji jaati hai.
-     */
+    /* Photo-search state. */
     let selectedPhotoFile = null;
     let selectedPhotoObjectUrl = "";
-    let currentSearchType = "Text";
-    let currentPhotoData = createEmptyPhotoData();
-
-    function createEmptyPhotoData() {
-      return {
-        photoSearchId: "",
-        fileName: "",
-        fileType: "",
-        fileSize: 0,
-        imageWidth: 0,
-        imageHeight: 0,
-        ocrText: "",
-        barcode: "",
-        finalQuery: ""
-      };
-    }
-
-    function createPhotoSearchId() {
-      return [
-        "PHOTO",
-        Date.now(),
-        Math.random().toString(36).substring(2, 10)
-      ].join("_");
-    }
-
-    function formatFileSize(bytes) {
-      const value = Number(bytes || 0);
-
-      if (value < 1024) {
-        return value + " B";
-      }
-
-      if (value < 1024 * 1024) {
-        return (value / 1024).toFixed(1) + " KB";
-      }
-
-      return (value / (1024 * 1024)).toFixed(2) + " MB";
-    }
-
-    function setPhotoProgress(text, percentage) {
-      const box = document.getElementById("photoProgress");
-      const label = document.getElementById("photoProgressText");
-      const fill = document.getElementById("photoProgressFill");
-
-      box.classList.add("show");
-      label.textContent = text || "Processing...";
-      fill.style.width =
-        Math.max(0, Math.min(100, Number(percentage || 0))) + "%";
-    }
-
-    function hidePhotoProgress() {
-      document
-        .getElementById("photoProgress")
-        .classList.remove("show");
-    }
-
-    async function handlePhotoSelection(event) {
-      const file =
-        event &&
-        event.target &&
-        event.target.files
-          ? event.target.files[0]
-          : null;
-
-      if (!file) {
-        return;
-      }
-
-      if (!String(file.type || "").startsWith("image/")) {
-        setMessage("Please select a valid image file.");
-        event.target.value = "";
-        return;
-      }
-
-      const maxBytes = 15 * 1024 * 1024;
-
-      if (file.size > maxBytes) {
-        setMessage("Image is too large. Maximum allowed size is 15 MB.");
-        event.target.value = "";
-        return;
-      }
-
-      if (selectedPhotoObjectUrl) {
-        URL.revokeObjectURL(selectedPhotoObjectUrl);
-      }
-
-      selectedPhotoFile = file;
-      selectedPhotoObjectUrl = URL.createObjectURL(file);
-
-      const preview =
-        document.getElementById("photoPreview");
-
-      preview.src = selectedPhotoObjectUrl;
-
-      try {
-        const dimensions =
-          await readImageDimensions(selectedPhotoObjectUrl);
-
-        currentPhotoData =
-          createEmptyPhotoData();
-
-        currentPhotoData.photoSearchId =
-          createPhotoSearchId();
-
-        currentPhotoData.fileName =
-          file.name || "camera-image";
-
-        currentPhotoData.fileType =
-          file.type || "";
-
-        currentPhotoData.fileSize =
-          file.size || 0;
-
-        currentPhotoData.imageWidth =
-          dimensions.width;
-
-        currentPhotoData.imageHeight =
-          dimensions.height;
-
-        document
-          .getElementById("photoMeta")
-          .textContent =
-            "File: " +
-            currentPhotoData.fileName +
-            " | Type: " +
-            (currentPhotoData.fileType || "Unknown") +
-            " | Size: " +
-            formatFileSize(currentPhotoData.fileSize) +
-            " | Dimensions: " +
-            currentPhotoData.imageWidth +
-            " × " +
-            currentPhotoData.imageHeight;
-
-        document
-          .getElementById("photoPreviewWrap")
-          .classList.add("show");
-
-        document
-          .getElementById("processPhotoButton")
-          .disabled = false;
-
-        document
-          .getElementById("ocrOutput")
-          .classList.remove("show");
-
-        document
-          .getElementById("ocrText")
-          .value = "";
-
-        document
-          .getElementById("barcodeResult")
-          .textContent =
-            "Barcode / ISBN: Not detected";
-
-        setMessage(
-          "Photo selected. Click “Read Photo & Search”.",
-          true
-        );
-
-      } catch (error) {
-        resetPhotoSearch();
-
-        setMessage(
-          "Unable to read selected image: " +
-          error.message
-        );
-      }
-    }
-
-    function readImageDimensions(imageUrl) {
-      return new Promise(function(resolve, reject) {
-        const image = new Image();
-
-        image.onload = function() {
-          resolve({
-            width:
-              image.naturalWidth ||
-              image.width ||
-              0,
-
-            height:
-              image.naturalHeight ||
-              image.height ||
-              0
-          });
-        };
-
-        image.onerror = function() {
-          reject(
-            new Error("Invalid or unreadable image.")
-          );
-        };
-
-        image.src = imageUrl;
-      });
-    }
-
-    async function createProcessedCanvas(file) {
-      const bitmap =
-        await createImageBitmap(file);
-
-      const maximumSide = 1800;
-
-      let width = bitmap.width;
-      let height = bitmap.height;
-
-      const scale =
-        Math.min(
-          1,
-          maximumSide /
-            Math.max(width, height)
-        );
-
-      width =
-        Math.max(
-          1,
-          Math.round(width * scale)
-        );
-
-      height =
-        Math.max(
-          1,
-          Math.round(height * scale)
-        );
-
-      const canvas =
-        document.createElement("canvas");
-
-      canvas.width = width;
-      canvas.height = height;
-
-      const context =
-        canvas.getContext(
-          "2d",
-          {
-            willReadFrequently: true
-          }
-        );
-
-      context.drawImage(
-        bitmap,
-        0,
-        0,
-        width,
-        height
-      );
-
-      bitmap.close();
-
-      const imageData =
-        context.getImageData(
-          0,
-          0,
-          width,
-          height
-        );
-
-      const data = imageData.data;
-
-      /*
-       * Light grayscale + contrast enhancement improves
-       * OCR on many book covers without destroying colours completely.
-       */
-      for (
-        let index = 0;
-        index < data.length;
-        index += 4
-      ) {
-        const gray =
-          data[index] * 0.299 +
-          data[index + 1] * 0.587 +
-          data[index + 2] * 0.114;
-
-        const contrasted =
-          Math.max(
-            0,
-            Math.min(
-              255,
-              (gray - 128) * 1.35 + 128
-            )
-          );
-
-        data[index] = contrasted;
-        data[index + 1] = contrasted;
-        data[index + 2] = contrasted;
-      }
-
-      context.putImageData(
-        imageData,
-        0,
-        0
-      );
-
-      return canvas;
-    }
-
-    async function processSelectedPhoto() {
-      if (!selectedPhotoFile) {
-        setMessage("Please select a book photo first.");
-        return;
-      }
-
-      const button =
-        document.getElementById(
-          "processPhotoButton"
-        );
-
-      button.disabled = true;
-      button.innerHTML =
-        '<span class="loader"></span>Reading Photo...';
-
-      document
-        .getElementById("ocrOutput")
-        .classList.remove("show");
-
-      setMessage("");
-
-      try {
-        setPhotoProgress(
-          "Preparing image...",
-          5
-        );
-
-        const canvas =
-          await createProcessedCanvas(
-            selectedPhotoFile
-          );
-
-        setPhotoProgress(
-          "Checking barcode / ISBN...",
-          15
-        );
-
-        const barcode =
-          await detectBarcodeFromCanvas(
-            canvas
-          );
-
-        currentPhotoData.barcode =
-          String(barcode || "").trim();
-
-        document
-          .getElementById(
-            "barcodeResult"
-          )
-          .textContent =
-            currentPhotoData.barcode
-              ? "Barcode / ISBN: " +
-                currentPhotoData.barcode
-              : "Barcode / ISBN: Not detected";
-
-        if (
-          typeof Tesseract ===
-          "undefined"
-        ) {
-          throw new Error(
-            "OCR library did not load. Check internet connection and reload the page."
-          );
-        }
-
-        setPhotoProgress(
-          "Reading book text...",
-          20
-        );
-
-        const ocrResult =
-          await Tesseract.recognize(
-            canvas,
-            "eng",
-            {
-              logger: function(message) {
-                if (
-                  message.status ===
-                  "recognizing text"
-                ) {
-                  const percentage =
-                    20 +
-                    Math.round(
-                      Number(
-                        message.progress ||
-                        0
-                      ) * 75
-                    );
-
-                  setPhotoProgress(
-                    "Reading book text... " +
-                    Math.round(
-                      Number(
-                        message.progress ||
-                        0
-                      ) * 100
-                    ) +
-                    "%",
-                    percentage
-                  );
-                }
-              }
-            }
-          );
-
-        const rawText =
-          ocrResult &&
-          ocrResult.data
-            ? ocrResult.data.text
-            : "";
-
-        const cleanedText =
-          cleanOcrText(rawText);
-
-        currentPhotoData.ocrText =
-          cleanedText;
-
-        const finalQuery =
-          buildPhotoSearchQuery(
-            cleanedText,
-            currentPhotoData.barcode
-          );
-
-        currentPhotoData.finalQuery =
-          finalQuery;
-
-        document
-          .getElementById("ocrText")
-          .value = cleanedText;
-
-        document
-          .getElementById("ocrOutput")
-          .classList.add("show");
-
-        setPhotoProgress(
-          "Photo reading completed.",
-          100
-        );
-
-        setTimeout(
-          hidePhotoProgress,
-          700
-        );
-
-        if (!finalQuery) {
-          setMessage(
-            "Photo read ho gayi, lekin usable text/barcode nahi mila. OCR text manually type karke search karein."
-          );
-
-          return;
-        }
-
-        document
-          .getElementById(
-            "searchInput"
-          )
-          .value = finalQuery;
-
-        currentSearchType = "Photo";
-
-        setMessage(
-          "Photo read successfully. Searching detected book details...",
-          true
-        );
-
-        await runSearch();
-
-      } catch (error) {
-        hidePhotoProgress();
-
-        setMessage(
-          "Photo search error: " +
-          error.message
-        );
-
-      } finally {
-        button.disabled = false;
-        button.textContent =
-          "Read Photo & Search";
-      }
-    }
-
-    async function detectBarcodeFromCanvas(
-      canvas
-    ) {
-      /*
-       * First preference: native BarcodeDetector.
-       */
-      if (
-        "BarcodeDetector" in window
-      ) {
-        try {
-          const supportedFormats =
-            await BarcodeDetector
-              .getSupportedFormats();
-
-          const requestedFormats = [
-            "ean_13",
-            "ean_8",
-            "upc_a",
-            "upc_e",
-            "code_128",
-            "code_39",
-            "itf",
-            "qr_code"
-          ].filter(function(format) {
-            return supportedFormats
-              .indexOf(format) !== -1;
-          });
-
-          const detector =
-            new BarcodeDetector(
-              requestedFormats.length
-                ? {
-                    formats:
-                      requestedFormats
-                  }
-                : undefined
-            );
-
-          const barcodes =
-            await detector.detect(canvas);
-
-          if (
-            barcodes &&
-            barcodes.length
-          ) {
-            return (
-              barcodes[0].rawValue ||
-              ""
-            );
-          }
-
-        } catch (error) {
-          /*
-           * Fallback to ZXing below.
-           */
-        }
-      }
-
-      /*
-       * Fallback: ZXing loaded from CDN.
-       */
-      if (
-        typeof ZXing === "undefined" ||
-        !ZXing.BrowserMultiFormatReader
-      ) {
-        return "";
-      }
-
-      let reader = null;
-
-      try {
-        reader =
-          new ZXing
-            .BrowserMultiFormatReader();
-
-        const temporaryImage =
-          new Image();
-
-        temporaryImage.src =
-          canvas.toDataURL(
-            "image/jpeg",
-            0.92
-          );
-
-        await new Promise(
-          function(resolve, reject) {
-            temporaryImage.onload =
-              resolve;
-
-            temporaryImage.onerror =
-              reject;
-          }
-        );
-
-        const result =
-          await reader
-            .decodeFromImageElement(
-              temporaryImage
-            );
-
-        return result
-          ? result.getText()
-          : "";
-
-      } catch (error) {
-        return "";
-
-      } finally {
-        if (
-          reader &&
-          typeof reader.reset ===
-            "function"
-        ) {
-          reader.reset();
-        }
-      }
-    }
-
-    function cleanOcrText(value) {
-      return String(value || "")
-        .replace(/\r/g, "\n")
-        .replace(/[|¦]/g, "I")
-        .replace(/[^\S\n]+/g, " ")
-        .split("\n")
-        .map(function(line) {
-          return line
-            .replace(/\s+/g, " ")
-            .trim();
-        })
-        .filter(function(line) {
-          return line.length >= 2;
-        })
-        .filter(function(line) {
-          return !/^[^a-zA-Z0-9]+$/.test(
-            line
-          );
-        })
-        .slice(0, 18)
-        .join("\n")
-        .trim();
-    }
-
-    function normalizeBarcodeForSearch(
-      value
-    ) {
-      const raw =
-        String(value || "").trim();
-
-      if (!raw) {
-        return "";
-      }
-
-      const digits =
-        raw.replace(/\D/g, "");
-
-      if (
-        digits.length === 10 ||
-        digits.length === 12 ||
-        digits.length === 13
-      ) {
-        return digits;
-      }
-
-      return raw;
-    }
-
-    function buildPhotoSearchQuery(
-      ocrText,
-      barcode
-    ) {
-      const normalizedBarcode =
-        normalizeBarcodeForSearch(
-          barcode
-        );
-
-      const usefulLines =
-        String(ocrText || "")
-          .split("\n")
-          .map(function(line) {
-            return line.trim();
-          })
-          .filter(Boolean)
-          .filter(function(line) {
-            const alphaNumeric =
-              line.replace(
-                /[^a-zA-Z0-9]/g,
-                ""
-              );
-
-            return (
-              alphaNumeric.length >= 3
-            );
-          })
-          .slice(0, 8);
-
-      const parts = [];
-
-      if (normalizedBarcode) {
-        parts.push(normalizedBarcode);
-      }
-
-      if (usefulLines.length) {
-        parts.push(
-          usefulLines.join(" ")
-        );
-      }
-
-      return parts
-        .join(" ")
-        .replace(/\s+/g, " ")
-        .trim()
-        .substring(0, 1200);
-    }
-
-    function searchUsingDetectedText() {
-      const editedText =
-        document
-          .getElementById("ocrText")
-          .value
-          .trim();
-
-      const finalQuery =
-        buildPhotoSearchQuery(
-          editedText,
-          currentPhotoData.barcode
-        );
-
-      if (!finalQuery) {
-        setMessage(
-          "OCR text ya barcode available nahi hai. Search text manually enter karein."
-        );
-        return;
-      }
-
-      currentPhotoData.ocrText =
-        editedText;
-
-      currentPhotoData.finalQuery =
-        finalQuery;
-
-      currentSearchType = "Photo";
-
-      document
-        .getElementById(
-          "searchInput"
-        )
-        .value = finalQuery;
-
-      runSearch();
-    }
-
-    function copyOcrToMainSearch() {
-      const editedText =
-        document
-          .getElementById("ocrText")
-          .value
-          .trim();
-
-      const finalQuery =
-        buildPhotoSearchQuery(
-          editedText,
-          currentPhotoData.barcode
-        );
-
-      document
-        .getElementById(
-          "searchInput"
-        )
-        .value = finalQuery;
-
-      currentPhotoData.ocrText =
-        editedText;
-
-      currentPhotoData.finalQuery =
-        finalQuery;
-
-      currentSearchType = "Photo";
-
-      setMessage(
-        "Detected text main search box me copy ho gaya.",
-        true
-      );
-
-      document
-        .getElementById(
-          "searchInput"
-        )
-        .focus();
-    }
-
-    function getPhotoApiParameters() {
-      if (
-        currentSearchType !== "Photo"
-      ) {
-        return {
-          searchType: "Text"
-        };
-      }
-
-      return {
-        searchType: "Photo",
-        photoSearchId:
-          currentPhotoData.photoSearchId,
-        fileName:
-          currentPhotoData.fileName,
-        fileType:
-          currentPhotoData.fileType,
-        fileSize:
-          String(
-            currentPhotoData.fileSize ||
-            0
-          ),
-        imageWidth:
-          String(
-            currentPhotoData.imageWidth ||
-            0
-          ),
-        imageHeight:
-          String(
-            currentPhotoData.imageHeight ||
-            0
-          ),
-        ocrText:
-          currentPhotoData.ocrText,
-        barcode:
-          currentPhotoData.barcode,
-        finalQuery:
-          currentPhotoData.finalQuery
-      };
-    }
-
-    function resetPhotoSearch() {
-      if (selectedPhotoObjectUrl) {
-        URL.revokeObjectURL(
-          selectedPhotoObjectUrl
-        );
-      }
-
-      selectedPhotoFile = null;
-      selectedPhotoObjectUrl = "";
-      currentPhotoData =
-        createEmptyPhotoData();
-
-      currentSearchType = "Text";
-
-      document
-        .getElementById(
-          "photoFileInput"
-        )
-        .value = "";
-
-      document
-        .getElementById(
-          "cameraFileInput"
-        )
-        .value = "";
-
-      document
-        .getElementById(
-          "photoPreview"
-        )
-        .removeAttribute("src");
-
-      document
-        .getElementById(
-          "photoPreviewWrap"
-        )
-        .classList.remove("show");
-
-      document
-        .getElementById(
-          "ocrOutput"
-        )
-        .classList.remove("show");
-
-      document
-        .getElementById(
-          "ocrText"
-        )
-        .value = "";
-
-      document
-        .getElementById(
-          "barcodeResult"
-        )
-        .textContent =
-          "Barcode / ISBN: Not detected";
-
-      document
-        .getElementById(
-          "processPhotoButton"
-        )
-        .disabled = true;
-
-      hidePhotoProgress();
-    }
-
+    let currentPhotoContext = null;
+    let currentLastSearchResults = [];
 
     function escapeHtml(value) {
       return String(value ?? "")
@@ -1732,7 +772,7 @@ concept physics"></textarea>
       }
     }
 
-    async function runSearch() {
+    async function runSearch(searchSource) {
       const input =
         document
           .getElementById("searchInput")
@@ -1744,19 +784,15 @@ concept physics"></textarea>
           "searchButton"
         );
 
+      if (searchSource !== "photo") {
+        currentPhotoContext = null;
+      }
+
       if (!input) {
         setMessage(
           "Please type or speak a search."
         );
         return;
-      }
-
-      /*
-       * User ne photo query ko manually change kar diya ho,
-       * to current edited value ko final photo query maan lo.
-       */
-      if (currentSearchType === "Photo") {
-        currentPhotoData.finalQuery = input;
       }
 
       /*
@@ -1781,15 +817,10 @@ concept physics"></textarea>
         validateApiUrl();
 
         const response =
-          await jsonpRequest(
-            Object.assign(
-              {
-                action: "search",
-                q: input
-              },
-              getPhotoApiParameters()
-            )
-          );
+          await jsonpRequest({
+            action: "search",
+            q: input
+          });
 
         if (!response.success) {
           throw new Error(
@@ -1798,8 +829,11 @@ concept physics"></textarea>
           );
         }
 
+        currentLastSearchResults =
+          response.results || [];
+
         renderSearchResults(
-          response.results || []
+          currentLastSearchResults
         );
 
       } catch (error) {
@@ -1998,7 +1032,7 @@ concept physics"></textarea>
                 confirmationId:
                   currentConfirmationId
               },
-              getPhotoApiParameters()
+              buildPhotoApiParameters()
             )
           );
 
@@ -2175,7 +1209,7 @@ concept physics"></textarea>
                   expectedSku,
                 note: note
               },
-              getPhotoApiParameters()
+              buildPhotoApiParameters()
             )
           );
 
@@ -2204,6 +1238,725 @@ concept physics"></textarea>
         button.textContent =
           "Submit Feedback";
       }
+    }
+
+
+    function createPhotoSearchId() {
+      return [
+        "IBA_PHOTO",
+        Date.now(),
+        Math.random().toString(36).substring(2, 12)
+      ].join("_");
+    }
+
+    function handlePhotoSelection(event) {
+      const files = event.target.files || [];
+      selectedPhotoFile = files.length ? files[0] : null;
+
+      if (selectedPhotoObjectUrl) {
+        URL.revokeObjectURL(selectedPhotoObjectUrl);
+        selectedPhotoObjectUrl = "";
+      }
+
+      currentPhotoContext = null;
+
+      const processButton =
+        document.getElementById("processPhotoButton");
+
+      const searchButton =
+        document.getElementById("searchPhotoTextButton");
+
+      if (!selectedPhotoFile) {
+        processButton.disabled = true;
+        searchButton.disabled = true;
+        return;
+      }
+
+      const fileType = String(selectedPhotoFile.type || "");
+      const fileName = String(selectedPhotoFile.name || "").toLowerCase();
+      const looksLikeImage =
+        fileType.startsWith("image/") ||
+        /\.(jpg|jpeg|png|webp|bmp|gif|heic|heif)$/i.test(fileName);
+
+      if (!looksLikeImage) {
+        setMessage("Please select a valid image file.");
+        event.target.value = "";
+        selectedPhotoFile = null;
+        processButton.disabled = true;
+        return;
+      }
+
+      if (selectedPhotoFile.size > 15 * 1024 * 1024) {
+        setMessage("Photo size 15 MB se kam honi chahiye.");
+        event.target.value = "";
+        selectedPhotoFile = null;
+        processButton.disabled = true;
+        return;
+      }
+
+      selectedPhotoObjectUrl =
+        URL.createObjectURL(selectedPhotoFile);
+
+      const preview =
+        document.getElementById("photoPreview");
+
+      preview.src = selectedPhotoObjectUrl;
+
+      document
+        .getElementById("photoPreviewWrap")
+        .classList.add("show");
+
+      document.getElementById("photoProgress").textContent =
+        "Selected: " + selectedPhotoFile.name;
+
+      document.getElementById("photoOcrText").value = "";
+      document.getElementById("photoBarcode").value = "";
+      document.getElementById("photoFinalQuery").value = "";
+
+      processButton.disabled = false;
+      searchButton.disabled = true;
+    }
+
+    async function readImageDimensions(imageElement) {
+      if (
+        imageElement &&
+        imageElement.complete &&
+        imageElement.naturalWidth
+      ) {
+        return {
+          width: imageElement.naturalWidth,
+          height: imageElement.naturalHeight
+        };
+      }
+
+      return new Promise(function(resolve, reject) {
+        if (!imageElement) {
+          reject(new Error("Image preview is not available."));
+          return;
+        }
+
+        const previousLoad = imageElement.onload;
+        const previousError = imageElement.onerror;
+
+        imageElement.onload = function(event) {
+          if (typeof previousLoad === "function") {
+            previousLoad.call(imageElement, event);
+          }
+
+          resolve({
+            width: imageElement.naturalWidth || imageElement.width || 0,
+            height: imageElement.naturalHeight || imageElement.height || 0
+          });
+        };
+
+        imageElement.onerror = function(event) {
+          if (typeof previousError === "function") {
+            previousError.call(imageElement, event);
+          }
+
+          reject(new Error("Selected image could not be loaded."));
+        };
+      });
+    }
+
+    function loadExternalScriptOnce(url, globalTest) {
+      if (typeof globalTest === "function" && globalTest()) {
+        return Promise.resolve();
+      }
+
+      return new Promise(function(resolve, reject) {
+        const existing = Array.from(
+          document.querySelectorAll("script[src]")
+        ).find(function(script) {
+          return script.src === url;
+        });
+
+        if (existing) {
+          const startedAt = Date.now();
+
+          const timer = setInterval(function() {
+            if (typeof globalTest === "function" && globalTest()) {
+              clearInterval(timer);
+              resolve();
+              return;
+            }
+
+            if (Date.now() - startedAt > 20000) {
+              clearInterval(timer);
+              reject(new Error("Required photo library could not be loaded."));
+            }
+          }, 150);
+
+          return;
+        }
+
+        const script = document.createElement("script");
+        script.src = url;
+        script.async = true;
+
+        script.onload = function() {
+          if (!globalTest || globalTest()) {
+            resolve();
+          } else {
+            reject(new Error("Photo library loaded but did not initialize."));
+          }
+        };
+
+        script.onerror = function() {
+          reject(new Error("Photo library download failed."));
+        };
+
+        document.head.appendChild(script);
+      });
+    }
+
+    async function ensurePhotoLibraries() {
+      if (!window.Tesseract) {
+        await loadExternalScriptOnce(
+          "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js",
+          function() {
+            return Boolean(window.Tesseract);
+          }
+        );
+      }
+
+      /*
+       * ZXing is optional because native BarcodeDetector may be available.
+       * Failure here must not stop OCR.
+       */
+      if (
+        !("BarcodeDetector" in window) &&
+        (!window.ZXing || !window.ZXing.BrowserMultiFormatReader)
+      ) {
+        try {
+          await loadExternalScriptOnce(
+            "https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js",
+            function() {
+              return Boolean(
+                window.ZXing &&
+                window.ZXing.BrowserMultiFormatReader
+              );
+            }
+          );
+        } catch (error) {
+          console.warn("ZXing unavailable:", error);
+        }
+      }
+    }
+
+    function fileToImage(file) {
+      return new Promise(function(resolve, reject) {
+        if (!file) {
+          reject(new Error("No image file selected."));
+          return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = function() {
+          const image = new Image();
+
+          image.onload = function() {
+            resolve(image);
+          };
+
+          image.onerror = function() {
+            reject(new Error("The selected photo is unreadable."));
+          };
+
+          image.src = String(reader.result || "");
+        };
+
+        reader.onerror = function() {
+          reject(new Error("Unable to read selected photo."));
+        };
+
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function createPhotoProcessingCanvases(file) {
+      const image = await fileToImage(file);
+
+      const maximumSide = 1800;
+      const originalWidth = image.naturalWidth || image.width || 0;
+      const originalHeight = image.naturalHeight || image.height || 0;
+
+      if (!originalWidth || !originalHeight) {
+        throw new Error("Photo dimensions could not be detected.");
+      }
+
+      const scale = Math.min(
+        1,
+        maximumSide / Math.max(originalWidth, originalHeight)
+      );
+
+      const width = Math.max(1, Math.round(originalWidth * scale));
+      const height = Math.max(1, Math.round(originalHeight * scale));
+
+      const originalCanvas = document.createElement("canvas");
+      originalCanvas.width = width;
+      originalCanvas.height = height;
+
+      const originalContext = originalCanvas.getContext(
+        "2d",
+        { willReadFrequently: true }
+      );
+
+      if (!originalContext) {
+        throw new Error("Browser canvas is not available.");
+      }
+
+      originalContext.drawImage(image, 0, 0, width, height);
+
+      const ocrCanvas = document.createElement("canvas");
+      ocrCanvas.width = width;
+      ocrCanvas.height = height;
+
+      const ocrContext = ocrCanvas.getContext(
+        "2d",
+        { willReadFrequently: true }
+      );
+
+      if (!ocrContext) {
+        throw new Error("Browser image processing is not available.");
+      }
+
+      ocrContext.drawImage(originalCanvas, 0, 0);
+
+      const imageData = ocrContext.getImageData(0, 0, width, height);
+      const pixels = imageData.data;
+
+      /*
+       * Grayscale + moderate contrast.
+       * This improves title-page/back-cover OCR while retaining letter edges.
+       */
+      for (let i = 0; i < pixels.length; i += 4) {
+        const gray =
+          pixels[i] * 0.299 +
+          pixels[i + 1] * 0.587 +
+          pixels[i + 2] * 0.114;
+
+        const contrasted = Math.max(
+          0,
+          Math.min(255, (gray - 128) * 1.45 + 128)
+        );
+
+        pixels[i] = contrasted;
+        pixels[i + 1] = contrasted;
+        pixels[i + 2] = contrasted;
+      }
+
+      ocrContext.putImageData(imageData, 0, 0);
+
+      return {
+        originalCanvas: originalCanvas,
+        ocrCanvas: ocrCanvas,
+        originalWidth: originalWidth,
+        originalHeight: originalHeight
+      };
+    }
+
+    async function canvasToImageElement(canvas) {
+      return new Promise(function(resolve, reject) {
+        const image = new Image();
+
+        image.onload = function() {
+          resolve(image);
+        };
+
+        image.onerror = function() {
+          reject(new Error("Processed image could not be prepared."));
+        };
+
+        image.src = canvas.toDataURL("image/jpeg", 0.94);
+      });
+    }
+
+    async function detectBarcodeFromCanvas(canvas) {
+      if ("BarcodeDetector" in window) {
+        try {
+          const supported =
+            typeof BarcodeDetector.getSupportedFormats === "function"
+              ? await BarcodeDetector.getSupportedFormats()
+              : [];
+
+          const desired = [
+            "ean_13",
+            "ean_8",
+            "upc_a",
+            "upc_e",
+            "code_128",
+            "code_39",
+            "itf",
+            "qr_code"
+          ];
+
+          const formats = supported.length
+            ? desired.filter(function(format) {
+                return supported.indexOf(format) !== -1;
+              })
+            : desired;
+
+          const detector = formats.length
+            ? new BarcodeDetector({ formats: formats })
+            : new BarcodeDetector();
+
+          const values = await detector.detect(canvas);
+
+          if (Array.isArray(values) && values.length) {
+            return String(values[0].rawValue || "").trim();
+          }
+        } catch (error) {
+          console.warn("Native barcode scan failed:", error);
+        }
+      }
+
+      if (
+        !window.ZXing ||
+        !window.ZXing.BrowserMultiFormatReader
+      ) {
+        return "";
+      }
+
+      const reader = new window.ZXing.BrowserMultiFormatReader();
+
+      try {
+        const image = await canvasToImageElement(canvas);
+        const result = await reader.decodeFromImageElement(image);
+
+        return result && result.getText
+          ? String(result.getText() || "").trim()
+          : "";
+      } catch (error) {
+        return "";
+      } finally {
+        if (typeof reader.reset === "function") {
+          reader.reset();
+        }
+      }
+    }
+
+    function cleanOcrForSearch(value) {
+      const lines = String(value || "")
+        .replace(/\r/g, "\n")
+        .replace(/[|¦]/g, "I")
+        .replace(/[^\S\n]+/g, " ")
+        .split("\n")
+        .map(function(line) {
+          return line
+            .replace(/\s+/g, " ")
+            .trim();
+        })
+        .filter(function(line) {
+          return line.length >= 2;
+        })
+        .filter(function(line) {
+          return /[A-Za-z0-9]/.test(line);
+        })
+        .slice(0, 24);
+
+      return lines.join("\n").trim();
+    }
+
+    function normalizePhotoBarcode(value) {
+      const raw = String(value || "").trim();
+
+      if (!raw) {
+        return "";
+      }
+
+      const digits = raw.replace(/\D/g, "");
+
+      if (
+        digits.length === 10 ||
+        digits.length === 12 ||
+        digits.length === 13
+      ) {
+        return digits;
+      }
+
+      return raw;
+    }
+
+    function buildFinalPhotoQuery(ocrText, barcode) {
+      const cleanBarcode = normalizePhotoBarcode(barcode);
+
+      const usefulLines = cleanOcrForSearch(ocrText)
+        .split("\n")
+        .map(function(line) {
+          return line.trim();
+        })
+        .filter(Boolean)
+        .filter(function(line) {
+          return line.replace(/[^A-Za-z0-9]/g, "").length >= 3;
+        })
+        .slice(0, 10);
+
+      const queryParts = [];
+
+      if (cleanBarcode) {
+        queryParts.push(cleanBarcode);
+      }
+
+      if (usefulLines.length) {
+        queryParts.push(usefulLines.join(" "));
+      }
+
+      return queryParts
+        .join(" ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .substring(0, 1200);
+    }
+
+    async function processSelectedPhoto() {
+      if (!selectedPhotoFile) {
+        setMessage("Please select a book photo first.");
+        return;
+      }
+
+      const processButton =
+        document.getElementById("processPhotoButton");
+
+      const progress =
+        document.getElementById("photoProgress");
+
+      processButton.disabled = true;
+      processButton.innerHTML =
+        '<span class="loader"></span>Preparing Photo...';
+
+      document.getElementById("searchPhotoTextButton").disabled = true;
+      setMessage("");
+
+      try {
+        progress.textContent = "Loading OCR and barcode tools...";
+
+        await ensurePhotoLibraries();
+
+        progress.textContent = "Preparing and improving photo...";
+
+        const prepared =
+          await createPhotoProcessingCanvases(selectedPhotoFile);
+
+        progress.textContent = "Checking barcode / ISBN...";
+
+        const barcodePromise =
+          detectBarcodeFromCanvas(prepared.originalCanvas);
+
+        progress.textContent = "Starting OCR...";
+
+        const ocrResult = await window.Tesseract.recognize(
+          prepared.ocrCanvas,
+          "eng",
+          {
+            logger: function(message) {
+              if (message.status === "recognizing text") {
+                progress.textContent =
+                  "Reading text: " +
+                  Math.round(Number(message.progress || 0) * 100) +
+                  "%";
+              } else if (message.status) {
+                progress.textContent =
+                  String(message.status)
+                    .replace(/_/g, " ") +
+                  "...";
+              }
+            }
+          }
+        );
+
+        const barcode = await barcodePromise;
+
+        const ocrText = cleanOcrForSearch(
+          ocrResult && ocrResult.data
+            ? ocrResult.data.text
+            : ""
+        );
+
+        const finalQuery = buildFinalPhotoQuery(
+          ocrText,
+          barcode
+        );
+
+        document.getElementById("photoOcrText").value = ocrText;
+        document.getElementById("photoBarcode").value = barcode;
+        document.getElementById("photoFinalQuery").value = finalQuery;
+
+        currentPhotoContext = {
+          searchType: "photo",
+          photoSearchId: createPhotoSearchId(),
+          photoFileName: selectedPhotoFile.name || "camera-photo",
+          photoFileType: selectedPhotoFile.type || "",
+          photoFileSize: selectedPhotoFile.size || 0,
+          photoWidth: prepared.originalWidth,
+          photoHeight: prepared.originalHeight,
+          ocrText: ocrText,
+          barcode: barcode,
+          finalQuery: finalQuery
+        };
+
+        document.getElementById("searchPhotoTextButton").disabled =
+          !finalQuery;
+
+        if (!finalQuery) {
+          progress.textContent =
+            "Photo processed, but readable text/barcode was not found.";
+
+          setMessage(
+            "Readable text nahi mila. Clear title page/back cover photo try karein, ya OCR text manually type karein."
+          );
+
+          return;
+        }
+
+        progress.textContent = barcode
+          ? "Photo ready. Barcode and text detected."
+          : "Photo ready. Text detected; barcode not found.";
+
+        /*
+         * Auto-search only after OCR has completed successfully.
+         */
+        await searchUsingPhotoText();
+
+      } catch (error) {
+        console.error(error);
+
+        progress.textContent = "Photo processing failed.";
+
+        setMessage(
+          "Photo search error: " +
+          (error && error.message
+            ? error.message
+            : String(error))
+        );
+
+      } finally {
+        processButton.disabled = false;
+        processButton.textContent = "Read Photo & Search";
+      }
+    }
+
+    async function searchUsingPhotoText() {
+      const ocrText =
+        document.getElementById("photoOcrText").value.trim();
+
+      const barcode =
+        document.getElementById("photoBarcode").value.trim();
+
+      let finalQuery =
+        document.getElementById("photoFinalQuery").value.trim();
+
+      if (!finalQuery) {
+        finalQuery = buildFinalPhotoQuery(ocrText, barcode);
+        document.getElementById("photoFinalQuery").value = finalQuery;
+      }
+
+      if (!finalQuery) {
+        setMessage("Detected OCR text ya barcode enter karein.");
+        return;
+      }
+
+      const preview = document.getElementById("photoPreview");
+
+      if (!currentPhotoContext) {
+        currentPhotoContext = {
+          searchType: "photo",
+          photoSearchId: createPhotoSearchId(),
+          photoFileName: selectedPhotoFile ? selectedPhotoFile.name : "",
+          photoFileType: selectedPhotoFile ? selectedPhotoFile.type : "",
+          photoFileSize: selectedPhotoFile ? selectedPhotoFile.size : "",
+          photoWidth: preview.naturalWidth || "",
+          photoHeight: preview.naturalHeight || ""
+        };
+      }
+
+      currentPhotoContext.ocrText = ocrText;
+      currentPhotoContext.barcode = barcode;
+      currentPhotoContext.finalQuery = finalQuery;
+
+      document.getElementById("searchInput").value = finalQuery;
+
+      await runSearch("photo");
+    }
+
+    function getTopCurrentResult() {
+      const groups = Array.isArray(currentLastSearchResults)
+        ? currentLastSearchResults
+        : [];
+
+      for (let groupIndex = 0; groupIndex < groups.length; groupIndex++) {
+        const matches = Array.isArray(groups[groupIndex].matches)
+          ? groups[groupIndex].matches
+          : [];
+
+        if (matches.length) {
+          return matches[0];
+        }
+      }
+
+      return null;
+    }
+
+    function getCurrentResultCount() {
+      return (Array.isArray(currentLastSearchResults)
+        ? currentLastSearchResults
+        : []
+      ).reduce(function(total, group) {
+        return total + (
+          Array.isArray(group.matches)
+            ? group.matches.length
+            : 0
+        );
+      }, 0);
+    }
+
+    function buildPhotoApiParameters() {
+      if (!currentPhotoContext) {
+        return {};
+      }
+
+      const top = getTopCurrentResult();
+
+      return {
+        searchType: "photo",
+        photoSearchId: currentPhotoContext.photoSearchId || "",
+        photoFileName: currentPhotoContext.photoFileName || "",
+        photoFileType: currentPhotoContext.photoFileType || "",
+        photoFileSize: currentPhotoContext.photoFileSize || "",
+        photoWidth: currentPhotoContext.photoWidth || "",
+        photoHeight: currentPhotoContext.photoHeight || "",
+        ocrText: currentPhotoContext.ocrText || "",
+        barcode: currentPhotoContext.barcode || "",
+        finalQuery: currentPhotoContext.finalQuery || currentSearchText || "",
+        resultCount: getCurrentResultCount(),
+        topSku: top ? top.sku : "",
+        topItem: top ? top.name : "",
+        topCategory: top ? top.category : "",
+        topClosingStock: top ? top.closingStock : "",
+        topSource: top ? top.source : "",
+        topScore: top ? top.score : ""
+      };
+    }
+
+    function clearPhotoSearch() {
+      if (selectedPhotoObjectUrl) {
+        URL.revokeObjectURL(selectedPhotoObjectUrl);
+        selectedPhotoObjectUrl = "";
+      }
+
+      selectedPhotoFile = null;
+      currentPhotoContext = null;
+
+      document.getElementById("photoInput").value = "";
+      document.getElementById("photoPreview").removeAttribute("src");
+      document.getElementById("photoPreviewWrap").classList.remove("show");
+      document.getElementById("photoProgress").textContent = "";
+      document.getElementById("photoOcrText").value = "";
+      document.getElementById("photoBarcode").value = "";
+      document.getElementById("photoFinalQuery").value = "";
+      document.getElementById("processPhotoButton").disabled = true;
+      document.getElementById("searchPhotoTextButton").disabled = true;
     }
 
     function setupVoiceRecognition() {
@@ -2310,8 +2063,6 @@ concept physics"></textarea>
     }
 
     function startVoiceSearch() {
-      currentSearchType = "Text";
-
       if (!recognition) {
         const supported =
           setupVoiceRecognition();
@@ -2376,8 +2127,7 @@ concept physics"></textarea>
       currentConfirmationId = "";
       currentSearchConfirmed = false;
       activeFeedbackSearch = "";
-
-      resetPhotoSearch();
+      currentLastSearchResults = [];
 
       setMessage("");
     }
