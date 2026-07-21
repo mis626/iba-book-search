@@ -440,7 +440,7 @@ concept physics"></textarea>
       <div class="photo-title">📷 Search by Book Photo</div>
 
       <div class="photo-help">
-        Front cover, back cover ya barcode ki clear photo select karo.
+        Front cover, title page, back cover ya barcode ki clear photo select karo. App OCR paragraph se likely book name extract karke IMS, GOV aur COMP teeno me search karega.
         Image browser ke andar process hogi. OCR text edit karke search bhi kar sakte ho.
       </div>
 
@@ -496,7 +496,7 @@ concept physics"></textarea>
         </div>
 
         <div>
-          <label class="label" for="photoFinalQuery">Final search query</label>
+          <label class="label" for="photoFinalQuery">Extracted book name / final query</label>
           <input
             id="photoFinalQuery"
             type="text"
@@ -738,7 +738,7 @@ concept physics"></textarea>
         document.getElementById("databaseInfo");
 
       info.textContent =
-        "Loading IMS and GOV data...";
+        "Loading IMS, GOV and COMP data...";
 
       try {
         validateApiUrl();
@@ -758,10 +758,12 @@ concept physics"></textarea>
         info.textContent =
           "Loaded: " +
           response.total +
-          " items | IMS: " +
+          " rows | IMS: " +
           response.ims +
           " | GOV: " +
           response.gov +
+          " | COMP: " +
+          response.comp +
           " | Dictionary: " +
           response.dictionaryEntries;
 
@@ -817,16 +819,52 @@ concept physics"></textarea>
         validateApiUrl();
 
         const response =
-          await jsonpRequest({
-            action: "search",
-            q: input
-          });
+          await jsonpRequest(
+            Object.assign(
+              {
+                action: "search",
+                q: input
+              },
+              buildPhotoApiParameters()
+            )
+          );
 
         if (!response.success) {
           throw new Error(
             response.message ||
             "Search failed."
           );
+        }
+
+        if (
+          searchSource === "photo" &&
+          response.photoAnalysis
+        ) {
+          const analysis = response.photoAnalysis;
+
+          if (analysis.extractedTitle) {
+            document
+              .getElementById("photoFinalQuery")
+              .value = analysis.extractedTitle;
+
+            document
+              .getElementById("searchInput")
+              .value = analysis.extractedTitle;
+
+            if (currentPhotoContext) {
+              currentPhotoContext.finalQuery =
+                analysis.extractedTitle;
+            }
+
+            document
+              .getElementById("photoProgress")
+              .textContent =
+                "Extracted book name: " +
+                analysis.extractedTitle +
+                " | Confidence: " +
+                analysis.confidence +
+                "%";
+          }
         }
 
         currentLastSearchResults =
