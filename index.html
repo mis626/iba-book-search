@@ -2,17 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IBA Smart Book Search</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -23,11 +17,7 @@
       font-family: Arial, sans-serif;
     }
 
-    .container {
-      width: 100%;
-      max-width: 1050px;
-      margin: 0 auto;
-    }
+    .container { width: 100%; max-width: 1050px; margin: 0 auto; }
 
     h1 {
       margin: 0 0 6px;
@@ -56,8 +46,7 @@
       font-weight: bold;
     }
 
-    textarea,
-    input {
+    textarea, input[type="text"], input[type="file"] {
       width: 100%;
       padding: 12px;
       border: 1px solid #d9d1c2;
@@ -67,13 +56,12 @@
     }
 
     textarea {
-      min-height: 140px;
+      min-height: 130px;
       resize: vertical;
       font-family: Consolas, monospace;
     }
 
-    textarea:focus,
-    input:focus {
+    textarea:focus, input:focus {
       border-color: #2c3a54;
       outline: none;
       box-shadow: 0 0 0 3px rgba(44,58,84,.12);
@@ -95,27 +83,20 @@
       color: white;
       font-weight: bold;
       cursor: pointer;
+      font-size: 14px;
     }
 
-    button.secondary {
-      background: #59667d;
-    }
+    button.secondary { background: #59667d; }
+    button.voice { background: #913c4c; }
+    button.feedback-yes { background: #3e6b4f; }
+    button.feedback-no { background: #7c3a4c; }
+    button:disabled { opacity: .55; cursor: not-allowed; }
 
-    button.voice {
-      background: #913c4c;
-    }
-
-    button.feedback-yes {
-      background: #3e6b4f;
-    }
-
-    button.feedback-no {
-      background: #7c3a4c;
-    }
-
-    button:disabled {
-      opacity: .55;
-      cursor: not-allowed;
+    button:focus-visible,
+    input:focus-visible,
+    textarea:focus-visible {
+      outline: 3px solid #2c3a54;
+      outline-offset: 2px;
     }
 
     .message {
@@ -125,9 +106,7 @@
       font-size: 14px;
     }
 
-    .message.success {
-      color: #3e6b4f;
-    }
+    .message.success { color: #3e6b4f; }
 
     .query-heading {
       margin-top: 22px;
@@ -136,6 +115,14 @@
       background: #edeff3;
       color: #2c3a54;
       font-weight: bold;
+    }
+
+    .query-heading .detail {
+      display: block;
+      margin-top: 4px;
+      color: #59667d;
+      font-size: 12px;
+      font-weight: normal;
     }
 
     .feedback-question {
@@ -164,7 +151,20 @@
       font-size: 12px;
     }
 
+    .section-heading {
+      margin: 20px 0 4px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #ddd4c5;
+      color: #625d55;
+      font-size: 13px;
+      font-weight: bold;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
     .card {
+      display: flex;
+      gap: 14px;
       margin-top: 10px;
       padding: 15px;
       border: 1px solid #e3dccc;
@@ -174,8 +174,20 @@
       box-shadow: 0 1px 3px rgba(0,0,0,.06);
     }
 
-    .card.no-match {
-      border-left-color: #7c3a4c;
+    .card.similar { border-left-color: #c08a3e; }
+    .card.no-match { border-left-color: #7c3a4c; }
+    .card.pinned { border-left-color: #2c3a54; background: #f7f9fc; }
+
+    .card-body { flex: 1; min-width: 0; }
+
+    .card-cover {
+      flex: 0 0 68px;
+      width: 68px;
+      height: 92px;
+      border: 1px solid #e3dccc;
+      border-radius: 4px;
+      object-fit: cover;
+      background: #f6f2ea;
     }
 
     .sku {
@@ -190,24 +202,41 @@
       font-weight: bold;
     }
 
+    .badge {
+      display: inline-block;
+      margin: 0 0 8px 6px;
+      padding: 3px 8px;
+      border-radius: 10px;
+      background: #2c3a54;
+      color: white;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    .badge.warm { background: #c08a3e; }
+
     .book-name {
       margin-bottom: 7px;
       font-size: 18px;
       font-weight: bold;
+      overflow-wrap: anywhere;
     }
 
-    .detail {
-      margin-top: 5px;
-      font-size: 14px;
-    }
-
-    .stock {
-      font-weight: bold;
-    }
+    .detail { margin-top: 5px; font-size: 14px; }
+    .stock { font-weight: bold; }
 
     .meta {
       margin-top: 8px;
       color: #777168;
+      font-size: 12px;
+    }
+
+    .card-action {
+      min-height: 0;
+      margin-top: 10px;
+      padding: 6px 12px;
+      background: #edeff3;
+      color: #2c3a54;
       font-size: 12px;
     }
 
@@ -222,9 +251,7 @@
       z-index: 9999;
     }
 
-    .modal-overlay.show {
-      display: flex;
-    }
+    .modal-overlay.show { display: flex; }
 
     .modal {
       width: 100%;
@@ -236,20 +263,24 @@
       background: white;
     }
 
-    .modal h2 {
-      margin: 0 0 8px;
-      color: #2c3a54;
-    }
-
-    .form-group {
-      margin-top: 14px;
-    }
+    .modal h2 { margin: 0 0 8px; color: #2c3a54; }
+    .form-group { margin-top: 14px; }
 
     .form-group label {
       display: block;
       margin-bottom: 6px;
       font-weight: bold;
       font-size: 13px;
+    }
+
+    .modal-hint {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      background: #f6f2ea;
+      color: #625d55;
+      font-size: 12px;
+      line-height: 1.5;
     }
 
     .loader {
@@ -264,34 +295,12 @@
       animation: spin .8s linear infinite;
     }
 
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (prefers-reduced-motion: reduce) {
+      .loader { animation: none; }
     }
 
-    @media (max-width: 650px) {
-      body {
-        padding: 20px 12px;
-      }
-
-      h1 {
-        font-size: 28px;
-      }
-
-      .buttons,
-      .feedback-answer-buttons {
-        flex-direction: column;
-      }
-
-      .buttons button,
-      .feedback-answer-buttons button {
-        width: 100%;
-      }
-    }
-
-
-    /* Photo-search additions. */
     .photo-panel {
       margin-top: 16px;
       padding: 16px;
@@ -314,15 +323,25 @@
       line-height: 1.5;
     }
 
+    .photo-lang {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin: 10px 0;
+      color: #625d55;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .photo-lang input { width: auto; margin-top: 2px; }
+
     .photo-preview-wrap {
       display: none;
       margin-top: 13px;
       text-align: center;
     }
 
-    .photo-preview-wrap.show {
-      display: block;
-    }
+    .photo-preview-wrap.show { display: block; }
 
     .photo-preview {
       max-width: 100%;
@@ -346,18 +365,21 @@
       margin-top: 12px;
     }
 
-    .photo-data-grid .full-width {
-      grid-column: 1 / -1;
-    }
+    .photo-data-grid .full-width { grid-column: 1 / -1; }
+    .photo-data-grid textarea { min-height: 110px; }
 
     @media (max-width: 650px) {
-      .photo-data-grid {
-        grid-template-columns: 1fr;
-      }
+      body { padding: 20px 12px; }
+      h1 { font-size: 28px; }
 
-      .photo-data-grid .full-width {
-        grid-column: auto;
-      }
+      .buttons, .feedback-answer-buttons { flex-direction: column; }
+      .buttons button, .feedback-answer-buttons button { width: 100%; }
+
+      .photo-data-grid { grid-template-columns: 1fr; }
+      .photo-data-grid .full-width { grid-column: auto; }
+
+      .card { flex-direction: column; }
+      .card-cover { width: 68px; }
     }
   </style>
 </head>
@@ -368,150 +390,95 @@
     <h1>IBA Smart Book Search</h1>
 
     <div class="subtitle">
-      Search result sirf tab Trend sheet me save hoga jab aap
-      “Yes, result sahi hai” select karenge. Galat result ka data
-      Feedback sheet me save hoga.
+      Hindi aur English dono me search kar sakte ho — type karo, bolo,
+      ya book ki photo lagao. Result Trend sheet me sirf tab save hoga
+      jab tum “Yes, result sahi hai” dabaoge. Galat result Feedback
+      sheet me jaayega.
     </div>
 
     <div id="databaseInfo" class="database-info">
-      Loading IMS and GOV data...
+      Data load ho raha hai...
     </div>
 
     <label class="label" for="searchInput">
-      Type or speak your search
+      Type ya bol kar search karo
     </label>
 
     <textarea
       id="searchInput"
       placeholder="Examples:
 pe 10
-ai 9
-arts 8
-kala
-saraswati physical education
+विज्ञान 10 सरस्वती
+ganit 12 bharti bhawan
 rd sharma 10
+हिंदी व्याकरण 8
 concept physics"></textarea>
 
     <div class="buttons">
-
-      <button
-        id="searchButton"
-        type="button"
-        onclick="runSearch()">
-        Search Books
-      </button>
-
-      <button
-        id="voiceButton"
-        class="voice"
-        type="button"
-        onclick="startVoiceSearch()">
-        🎤 Voice Search
-      </button>
-
-      <button
-        id="stopVoiceButton"
-        class="secondary"
-        type="button"
-        onclick="stopVoiceSearch()"
-        disabled>
-        Stop Voice
-      </button>
-
-      <button
-        class="secondary"
-        type="button"
-        onclick="clearSearch()">
-        Clear
-      </button>
-
-      <button
-        class="secondary"
-        type="button"
-        onclick="loadDatabaseInfo()">
-        Refresh Data
-      </button>
-
+      <button id="searchButton" type="button">Search books</button>
+      <button id="voiceButton" class="voice" type="button">🎤 Voice search</button>
+      <button id="stopVoiceButton" class="secondary" type="button" disabled>Stop voice</button>
+      <button id="clearButton" class="secondary" type="button">Clear</button>
+      <button id="refreshButton" class="secondary" type="button">Refresh data</button>
     </div>
 
-
-
     <div class="photo-panel">
-      <div class="photo-title">📷 Search by Book Photo</div>
+      <div class="photo-title">📷 Book ki photo se search</div>
 
       <div class="photo-help">
-        Front cover, title page, back cover ya barcode ki clear photo select karo. App OCR paragraph se likely book name extract karke IMS, GOV aur COMP teeno me search karega.
-        Image browser ke andar process hogi. OCR text edit karke search bhi kar sakte ho.
+        Front cover, title page ya barcode ki clear photo lo. App photo se
+        book ka <strong>naam</strong> nikaalta hai (poora paragraph nahi) aur
+        IMS, GOV, COMP teeno me dhoondhta hai. Hindi cover bhi chalega.
+        Image tumhare browser me hi process hoti hai.
       </div>
 
       <input
         id="photoInput"
         type="file"
         accept="image/*"
-        capture="environment"
-        onchange="handlePhotoSelection(event)">
+        capture="environment">
+
+      <label class="photo-lang">
+        <input id="photoHindiToggle" type="checkbox" checked>
+        <span>
+          Hindi (Devanagari) text bhi padho.
+          Pehli baar me extra language file download hoti hai, isliye
+          thoda time lagta hai. Sirf English covers ke liye ye off kar do.
+        </span>
+      </label>
 
       <div class="buttons">
-        <button
-          id="processPhotoButton"
-          type="button"
-          onclick="processSelectedPhoto()"
-          disabled>
-          Read Photo & Search
-        </button>
-
-        <button
-          class="secondary"
-          type="button"
-          onclick="clearPhotoSearch()">
-          Clear Photo
-        </button>
+        <button id="processPhotoButton" type="button" disabled>Read photo &amp; search</button>
+        <button id="clearPhotoButton" class="secondary" type="button">Clear photo</button>
       </div>
 
-      <div
-        id="photoPreviewWrap"
-        class="photo-preview-wrap">
-        <img
-          id="photoPreview"
-          class="photo-preview"
-          alt="Selected book preview">
+      <div id="photoPreviewWrap" class="photo-preview-wrap">
+        <img id="photoPreview" class="photo-preview" alt="Selected book preview">
       </div>
 
       <div id="photoProgress" class="photo-progress"></div>
 
       <div class="photo-data-grid">
         <div class="full-width">
-          <label class="label" for="photoOcrText">Detected OCR text</label>
+          <label class="label" for="photoOcrText">Photo se mila text</label>
           <textarea
             id="photoOcrText"
-            placeholder="Photo process hone ke baad detected text yahan aayega. Aap isko edit kar sakte ho."></textarea>
+            placeholder="Photo process hone ke baad text yahan aayega. Edit bhi kar sakte ho."></textarea>
         </div>
 
         <div>
-          <label class="label" for="photoBarcode">Detected barcode / ISBN</label>
-          <input
-            id="photoBarcode"
-            type="text"
-            placeholder="Barcode not detected">
+          <label class="label" for="photoBarcode">Barcode / ISBN</label>
+          <input id="photoBarcode" type="text" placeholder="Barcode nahi mila">
         </div>
 
         <div>
-          <label class="label" for="photoFinalQuery">Extracted book name / final query</label>
-          <input
-            id="photoFinalQuery"
-            type="text"
-            placeholder="OCR text or barcode">
+          <label class="label" for="photoFinalQuery">Nikala gaya book name</label>
+          <input id="photoFinalQuery" type="text" placeholder="Photo padhne ke baad bharega">
         </div>
       </div>
 
       <div class="buttons">
-        <button
-          id="searchPhotoTextButton"
-          type="button"
-          onclick="searchUsingPhotoText()"
-          disabled>
-          Search Using Detected Text
-        </button>
+        <button id="searchPhotoTextButton" type="button" disabled>Is text se search karo</button>
       </div>
     </div>
 
@@ -520,99 +487,73 @@ concept physics"></textarea>
 
   </div>
 
-  <div
-    id="feedbackModal"
-    class="modal-overlay">
-
+  <div id="feedbackModal" class="modal-overlay">
     <div class="modal">
-
-      <h2>Kaunsi book aani chahiye?</h2>
+      <h2>Kaunsi book aani chahiye thi?</h2>
 
       <div id="feedbackSearchLabel"></div>
 
       <div class="form-group">
-        <label for="expectedBook">
-          Expected book name
-        </label>
-
-        <input
-          id="expectedBook"
-          type="text"
-          placeholder="Example: CBSE Physical Edu-10 (NSH)">
+        <label for="expectedBook">Book ka naam</label>
+        <input id="expectedBook" type="text" placeholder="Example: CBSE Physical Edu-10 (NSH)">
       </div>
 
       <div class="form-group">
-        <label for="expectedSku">
-          Expected SKU, agar pata ho
-        </label>
-
-        <input
-          id="expectedSku"
-          type="text"
-          placeholder="Example: NSHCPE10-6">
+        <label for="expectedSku">SKU, agar pata ho</label>
+        <input id="expectedSku" type="text" placeholder="Example: NSHCPE10-6">
       </div>
 
       <div class="form-group">
-        <label for="feedbackNote">
-          Remarks
-        </label>
+        <label for="feedbackNote">Remarks</label>
+        <input id="feedbackNote" type="text" placeholder="Optional">
+      </div>
 
-        <input
-          id="feedbackNote"
-          type="text"
-          placeholder="Optional remarks">
+      <div class="modal-hint">
+        Submit karne par ye Feedback sheet me <strong>Pending</strong> jaayega.
+        Sheet ke Status column me <strong>Approved</strong> likhne aur
+        “Refresh data” dabane ke baad ye book isi search par sabse upar aayegi.
       </div>
 
       <div class="buttons">
-        <button
-          id="submitFeedbackButton"
-          type="button"
-          onclick="submitWrongFeedback()">
-          Submit Feedback
-        </button>
-
-        <button
-          class="secondary"
-          type="button"
-          onclick="closeFeedbackModal()">
-          Cancel
-        </button>
+        <button id="submitFeedbackButton" type="button">Submit feedback</button>
+        <button id="cancelFeedbackButton" class="secondary" type="button">Cancel</button>
       </div>
-
     </div>
   </div>
 
-
-  <script defer src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"></script>
-
   <script>
-    /*
-     * Apna current Apps Script /exec URL yahan paste karo.
-     */
+    /* ============================================================
+     * SETTING — apna Apps Script /exec URL yahan paste karo.
+     * Script ko naya deploy karne ke baad ye URL update karna hai.
+     * ============================================================ */
     const API_URL =
       "https://script.google.com/macros/s/AKfycbx19Eyx1duAhPFxZNFCjo0tF-pXYaFeQXjjy3P6RKU-f_dRkBYYhqT9j-oTUM4ZgkoLxw/exec";
+
+    const TESSERACT_URL =
+      "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js";
+    const ZXING_URL =
+      "https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js";
+
+    /* JSONP GET request ki safe limit. */
+    const MAX_URL_LENGTH = 7000;
 
     let recognition = null;
     let voiceRunning = false;
 
     let activeFeedbackSearch = "";
-
-    /*
-     * Current search ki unique session information.
-     */
     let currentSearchText = "";
     let currentConfirmationId = "";
     let currentSearchConfirmed = false;
 
-    /* Photo-search state. */
     let selectedPhotoFile = null;
     let selectedPhotoObjectUrl = "";
     let currentPhotoContext = null;
     let currentLastSearchResults = [];
 
+    function byId(id) { return document.getElementById(id); }
+
     function escapeHtml(value) {
-      return String(value ?? "")
+      return String(value === null || value === undefined ? "" : value)
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
@@ -620,67 +561,66 @@ concept physics"></textarea>
         .replace(/'/g, "&#039;");
     }
 
-    function encodeJsValue(value) {
-      return encodeURIComponent(
-        String(value ?? "")
-      );
-    }
-
-    function createConfirmationId() {
+    function createId(prefix) {
       return [
-        "IBA",
+        prefix,
         Date.now(),
-        Math.random()
-          .toString(36)
-          .substring(2, 12)
+        Math.random().toString(36).substring(2, 12)
       ].join("_");
     }
 
     function setMessage(text, success) {
-      const element =
-        document.getElementById("message");
-
+      const element = byId("message");
       element.textContent = text || "";
-
-      element.classList.toggle(
-        "success",
-        Boolean(success)
-      );
+      element.classList.toggle("success", Boolean(success));
     }
 
     function validateApiUrl() {
-      if (
-        !API_URL ||
-        API_URL.includes("YOUR_APPS") ||
-        !API_URL.includes("/exec")
-      ) {
+      if (!API_URL || API_URL.indexOf("/exec") === -1) {
         throw new Error(
-          "Apps Script /exec URL index.html me add nahi hai."
+          "Apps Script /exec URL index.html me set nahi hai."
         );
       }
     }
 
+    /* ============================================================
+     * BACKEND CALL
+     * ============================================================ */
+
+    /**
+     * JSONP request. Bade OCR text par URL limit cross ho sakti hai,
+     * isliye zaroorat padne par heavy parameters chhod diye jaate hain.
+     */
     function jsonpRequest(parameters) {
-      return new Promise(function(resolve, reject) {
-        const callbackName =
-          "__ibaCallback_" +
-          Date.now() +
-          "_" +
-          Math.floor(Math.random() * 100000);
+      return new Promise(function (resolve, reject) {
+        const callbackName = "__ibaCallback_" +
+          Date.now() + "_" + Math.floor(Math.random() * 100000);
 
-        const script =
-          document.createElement("script");
+        const query = new URLSearchParams(parameters);
+        query.set("callback", callbackName);
+        query.set("_", String(Date.now()));
 
-        const timeout =
-          setTimeout(function() {
-            cleanup();
+        /* URL bahut lambi ho to sabse bhaari cheez pehle hatao. */
+        const droppable = ["ocrText", "topItem", "topCategory"];
+        let dropIndex = 0;
 
-            reject(
-              new Error(
-                "Backend response timed out."
-              )
-            );
-          }, 60000);
+        while (
+          (API_URL + "?" + query.toString()).length > MAX_URL_LENGTH &&
+          dropIndex < droppable.length
+        ) {
+          query.delete(droppable[dropIndex]);
+          dropIndex++;
+        }
+
+        const script = document.createElement("script");
+
+        const timeout = setTimeout(function () {
+          cleanup();
+          reject(new Error(
+            "Backend ne 60 second me jawab nahi diya. Internet check karo " +
+            "aur dobara try karo."
+          ));
+        }, 60000);
 
         function cleanup() {
           clearTimeout(timeout);
@@ -689,603 +629,429 @@ concept physics"></textarea>
             script.parentNode.removeChild(script);
           }
 
-          try {
-            delete window[callbackName];
-          } catch (error) {
-            window[callbackName] = undefined;
-          }
+          try { delete window[callbackName]; }
+          catch (error) { window[callbackName] = undefined; }
         }
 
-        window[callbackName] = function(data) {
+        window[callbackName] = function (data) {
           cleanup();
           resolve(data);
         };
 
-        const query =
-          new URLSearchParams(parameters);
+        script.src = API_URL + "?" + query.toString();
 
-        query.set(
-          "callback",
-          callbackName
-        );
-
-        query.set(
-          "_",
-          String(Date.now())
-        );
-
-        script.src =
-          API_URL +
-          "?" +
-          query.toString();
-
-        script.onerror = function() {
+        script.onerror = function () {
           cleanup();
-
-          reject(
-            new Error(
-              "Apps Script backend se connection nahi ho paya."
-            )
-          );
+          reject(new Error(
+            "Apps Script backend se connection nahi hua. Deployment " +
+            "\"Anyone\" par set hai ye check karo."
+          ));
         };
 
         document.body.appendChild(script);
       });
     }
 
-    async function loadDatabaseInfo() {
-      const info =
-        document.getElementById("databaseInfo");
+    async function loadDatabaseInfo(forceRefresh) {
+      const info = byId("databaseInfo");
+      const button = byId("refreshButton");
 
-      info.textContent =
-        "Loading IMS, GOV and COMP data...";
+      info.textContent = forceRefresh
+        ? "Fresh data padha ja raha hai..."
+        : "Data load ho raha hai...";
+
+      button.disabled = true;
 
       try {
         validateApiUrl();
 
-        const response =
-          await jsonpRequest({
-            action: "info"
-          });
+        /*
+         * "Refresh data" par pehle cache clear hota hai, warna
+         * 10 minute tak purana stock dikhta rehta hai.
+         */
+        const response = await jsonpRequest({
+          action: forceRefresh ? "clearcache" : "info"
+        });
 
         if (!response.success) {
-          throw new Error(
-            response.message ||
-            "Unable to load data."
-          );
+          throw new Error(response.message || "Data load nahi hua.");
         }
 
-        info.textContent =
-          "Loaded: " +
-          response.total +
-          " rows | IMS: " +
-          response.ims +
-          " | GOV: " +
-          response.gov +
-          " | COMP: " +
-          response.comp +
-          " | Dictionary: " +
-          response.dictionaryEntries;
+        const parts = [
+          "Books: " + response.total,
+          "IMS " + response.ims,
+          "GOV " + response.gov,
+          "COMP " + response.comp,
+          "Dictionary " + response.dictionaryEntries,
+          "Approved rules " + response.approvedFeedback
+        ];
+
+        info.textContent = parts.join("  |  ");
+
+        if (response.missingSheets && response.missingSheets.length) {
+          info.textContent += "   ⚠ Missing sheets: " +
+            response.missingSheets.join(", ");
+        }
+
+        if (forceRefresh) {
+          setMessage("Fresh data load ho gaya.", true);
+        }
 
       } catch (error) {
-        info.textContent =
-          "Data load error: " +
-          error.message;
+        info.textContent = "Data load error: " + error.message;
+
+      } finally {
+        button.disabled = false;
       }
     }
 
-    async function runSearch(searchSource) {
-      const input =
-        document
-          .getElementById("searchInput")
-          .value
-          .trim();
+    /* ============================================================
+     * SEARCH
+     * ============================================================ */
 
-      const button =
-        document.getElementById(
-          "searchButton"
-        );
+    async function runSearch(searchSource) {
+      const input = byId("searchInput").value.trim();
+      const button = byId("searchButton");
 
       if (searchSource !== "photo") {
         currentPhotoContext = null;
       }
 
       if (!input) {
-        setMessage(
-          "Please type or speak a search."
-        );
+        setMessage("Pehle kuch type karo, bolo ya photo lagao.");
         return;
       }
 
-      /*
-       * Har new search ke liye fresh confirmation ID.
-       */
       currentSearchText = input;
-      currentConfirmationId =
-        createConfirmationId();
+      currentConfirmationId = createId("IBA");
       currentSearchConfirmed = false;
 
       setMessage("");
-
       button.disabled = true;
-      button.innerHTML =
-        '<span class="loader"></span>Searching...';
-
-      document
-        .getElementById("results")
-        .innerHTML = "";
+      button.innerHTML = '<span class="loader"></span>Searching...';
+      byId("results").innerHTML = "";
 
       try {
         validateApiUrl();
 
-        const response =
-          await jsonpRequest(
-            Object.assign(
-              {
-                action: "search",
-                q: input
-              },
-              buildPhotoApiParameters()
-            )
-          );
+        const response = await jsonpRequest(
+          Object.assign(
+            { action: "search", q: input },
+            buildPhotoApiParameters()
+          )
+        );
 
         if (!response.success) {
-          throw new Error(
-            response.message ||
-            "Search failed."
+          throw new Error(response.message || "Search fail ho gayi.");
+        }
+
+        if (searchSource === "photo" && response.photoAnalysis) {
+          applyPhotoAnalysis(response.photoAnalysis);
+        }
+
+        currentLastSearchResults = response.results || [];
+        renderSearchResults(currentLastSearchResults);
+
+        if (!response.strongCount && !response.similarCount) {
+          setMessage(
+            "Kuch nahi mila. Spelling badal kar try karo, ya \"No\" dabakar " +
+            "batao ki kaunsi book chahiye thi."
           );
         }
 
-        if (
-          searchSource === "photo" &&
-          response.photoAnalysis
-        ) {
-          const analysis = response.photoAnalysis;
-
-          if (analysis.extractedTitle) {
-            document
-              .getElementById("photoFinalQuery")
-              .value = analysis.extractedTitle;
-
-            document
-              .getElementById("searchInput")
-              .value = analysis.extractedTitle;
-
-            if (currentPhotoContext) {
-              currentPhotoContext.finalQuery =
-                analysis.extractedTitle;
-            }
-
-            document
-              .getElementById("photoProgress")
-              .textContent =
-                "Extracted book name: " +
-                analysis.extractedTitle +
-                " | Confidence: " +
-                analysis.confidence +
-                "%";
-          }
-        }
-
-        currentLastSearchResults =
-          response.results || [];
-
-        renderSearchResults(
-          currentLastSearchResults
-        );
-
       } catch (error) {
-        setMessage(
-          "Search error: " +
-          error.message
-        );
+        setMessage("Search error: " + error.message);
 
       } finally {
         button.disabled = false;
-        button.textContent =
-          "Search Books";
+        button.textContent = "Search books";
       }
     }
 
-    function renderSearchResults(
-      queryResults
-    ) {
-      const resultsBox =
-        document.getElementById(
-          "results"
-        );
+    function applyPhotoAnalysis(analysis) {
+      const progress = byId("photoProgress");
+
+      if (analysis.extractedTitle) {
+        byId("photoFinalQuery").value = analysis.extractedTitle;
+        byId("searchInput").value = analysis.extractedTitle;
+
+        if (currentPhotoContext) {
+          currentPhotoContext.finalQuery = analysis.extractedTitle;
+        }
+      }
+
+      const lines = [];
+
+      if (analysis.extractedTitle) {
+        lines.push("Book name: " + analysis.extractedTitle);
+      }
+
+      lines.push(
+        "Kaise mila: " + analysis.method +
+        " (" + analysis.confidence + "% confidence)"
+      );
+
+      if (analysis.barcodeMessage) {
+        lines.push(analysis.barcodeMessage);
+      }
+
+      progress.textContent = lines.join("  •  ");
+    }
+
+    function renderCard(book, kind) {
+      const classNames = ["card"];
+
+      if (kind === "similar") { classNames.push("similar"); }
+      if (book.feedbackPreferred) { classNames.push("pinned"); }
+
+      const cover = book.imageUrl
+        ? '<img class="card-cover" alt="" loading="lazy" src="' +
+          escapeHtml(book.imageUrl) + '">'
+        : "";
+
+      const badges = [];
+
+      if (book.feedbackPreferred) {
+        badges.push('<span class="badge">Approved choice</span>');
+      }
+
+      if (kind === "similar") {
+        badges.push('<span class="badge warm">Milti julti</span>');
+      }
+
+      const stockText = book.stockLabel !== undefined && book.stockLabel !== ""
+        ? book.stockLabel
+        : String(book.closingStock);
+
+      return '<div class="' + classNames.join(" ") + '">' +
+        cover +
+        '<div class="card-body">' +
+          '<span class="sku">' + escapeHtml(book.sku) + "</span>" +
+          badges.join("") +
+          '<div class="book-name">' + escapeHtml(book.name) + "</div>" +
+          '<div class="detail">Category: ' + escapeHtml(book.category) + "</div>" +
+          '<div class="detail">Closing stock: <span class="stock">' +
+            escapeHtml(stockText) + "</span></div>" +
+          '<div class="meta">Source: ' + escapeHtml(book.source) +
+            "  |  Match: " + escapeHtml(book.score) + "%" +
+            (book.matchedOn ? "  |  " + escapeHtml(book.matchedOn) : "") +
+          "</div>" +
+          '<button class="card-action" type="button" ' +
+            'data-action="pick" ' +
+            'data-sku="' + escapeHtml(book.sku) + '" ' +
+            'data-name="' + escapeHtml(book.name) + '">' +
+            "Ye book chahiye thi" +
+          "</button>" +
+        "</div>" +
+      "</div>";
+    }
+
+    function renderSearchResults(queryResults) {
+      const resultsBox = byId("results");
+
+      if (!queryResults.length) {
+        resultsBox.innerHTML = "";
+        return;
+      }
 
       let html = "";
 
-      queryResults.forEach(
-        function(queryResult) {
-          const matches =
-            queryResult.matches || [];
+      queryResults.forEach(function (queryResult, queryIndex) {
+        const matches = queryResult.matches || [];
+        const similar = queryResult.similar || [];
 
-          const encodedQuery =
-            encodeJsValue(
-              queryResult.query
-            );
+        const detailParts = [];
 
-          html +=
-            '<div class="query-heading">' +
-              'Search: "' +
-              escapeHtml(queryResult.query) +
-              '" — ' +
-              matches.length +
-              " relevant result(s)" +
-            "</div>";
+        if (queryResult.normalizedQuery) {
+          detailParts.push("System ne samjha: " + queryResult.normalizedQuery);
+        }
 
-          html +=
-            '<div class="feedback-question">' +
+        if (queryResult.approvedPin) {
+          detailParts.push("Approved feedback laga hua hai");
+        }
 
-              '<div class="feedback-question-title">' +
-                "Kya aapko search output sahi mila?" +
-              "</div>" +
+        html += '<div class="query-heading">' +
+          'Search: "' + escapeHtml(queryResult.query) + '" — ' +
+          matches.length + " pakka result" +
+          (similar.length ? ", " + similar.length + " milti julti" : "") +
+          (detailParts.length
+            ? '<span class="detail">' + escapeHtml(detailParts.join("  •  ")) + "</span>"
+            : "") +
+        "</div>";
 
-              '<div class="feedback-answer-buttons">' +
+        html += '<div class="feedback-question">' +
+          '<div class="feedback-question-title">' +
+            "Kya search ka output sahi mila?" +
+          "</div>" +
+          '<div class="feedback-answer-buttons">' +
+            '<button class="feedback-yes" type="button" ' +
+              'data-action="confirm" data-index="' + queryIndex + '">' +
+              "Yes, result sahi hai" +
+            "</button>" +
+            '<button class="feedback-no" type="button" ' +
+              'data-action="reject" data-index="' + queryIndex + '">' +
+              "No, result galat hai" +
+            "</button>" +
+          "</div>" +
+          '<div class="feedback-status" data-status-for="' + queryIndex + '"></div>' +
+        "</div>";
 
-                '<button ' +
-                  'id="yesButton_' +
-                    encodedQuery +
-                  '" ' +
-                  'class="feedback-yes" ' +
-                  'type="button" ' +
-                  'onclick="confirmRelevantResult(' +
-                    "'" +
-                    encodedQuery +
-                    "'" +
-                  ', this)">' +
-                  "Yes, result sahi hai" +
-                "</button>" +
+        if (!matches.length && !similar.length) {
+          html += '<div class="card no-match"><div class="card-body">' +
+            '<div class="book-name">Koi result nahi mila</div>' +
+            '<div class="detail">' +
+              "\"No\" dabakar batao ki kaunsi book chahiye thi — " +
+              "Approve karne ke baad wo agli baar top par aayegi." +
+            "</div>" +
+          "</div></div>";
+          return;
+        }
 
-                '<button ' +
-                  'class="feedback-no" ' +
-                  'type="button" ' +
-                  'onclick="openFeedbackModal(' +
-                    "'" +
-                    encodedQuery +
-                    "'" +
-                  ')">' +
-                  "No, result galat hai" +
-                "</button>" +
+        matches.forEach(function (book) {
+          html += renderCard(book, "strong");
+        });
 
-              "</div>" +
+        if (similar.length) {
+          html += '<div class="section-heading">' +
+            "Milti julti books (" + similar.length + ")" +
+          "</div>";
 
-              '<div ' +
-                'id="feedbackStatus_' +
-                  encodedQuery +
-                '" ' +
-                'class="feedback-status">' +
-              "</div>" +
-
-            "</div>";
-
-          if (!matches.length) {
-            html +=
-              '<div class="card no-match">' +
-                '<div class="book-name">' +
-                  "No relevant match found" +
-                "</div>" +
-                '<div class="detail">' +
-                  "No button click karke expected book batao." +
-                "</div>" +
-              "</div>";
-
-            return;
-          }
-
-          matches.forEach(function(book) {
-            html +=
-              '<div class="card">' +
-
-                '<div class="sku">' +
-                  escapeHtml(book.sku) +
-                "</div>" +
-
-                '<div class="book-name">' +
-                  escapeHtml(book.name) +
-                "</div>" +
-
-                '<div class="detail">' +
-                  "Category: " +
-                  escapeHtml(book.category) +
-                "</div>" +
-
-                '<div class="detail">' +
-                  "Closing Stock: " +
-                  '<span class="stock">' +
-                    escapeHtml(
-                      book.closingStock
-                    ) +
-                  "</span>" +
-                "</div>" +
-
-                '<div class="meta">' +
-                  "Source: " +
-                  escapeHtml(book.source) +
-                  " | Match: " +
-                  escapeHtml(book.score) +
-                  "%" +
-                "</div>" +
-
-              "</div>";
+          similar.forEach(function (book) {
+            html += renderCard(book, "similar");
           });
         }
-      );
+      });
 
       resultsBox.innerHTML = html;
     }
 
-    /**
-     * Yes button:
-     * Trend sheet me search aur output save karega.
-     */
-    async function confirmRelevantResult(
-      encodedSearch,
-      clickedButton
-    ) {
-      const query =
-        decodeURIComponent(
-          encodedSearch
-        );
+    /* ============================================================
+     * YES / NO
+     * ============================================================ */
 
-      const statusElement =
-        document.getElementById(
-          "feedbackStatus_" +
-          encodedSearch
-        );
+    async function confirmRelevantResult(queryIndex, clickedButton) {
+      const statusElement = document.querySelector(
+        '[data-status-for="' + queryIndex + '"]'
+      );
 
       if (currentSearchConfirmed) {
-        statusElement.textContent =
-          "Trend sheet me pehle hi save ho chuka hai.";
-
+        statusElement.textContent = "Trend sheet me pehle hi save ho chuka hai.";
         clickedButton.disabled = true;
-        clickedButton.textContent =
-          "✓ Saved in Trend";
-
+        clickedButton.textContent = "✓ Saved in Trend";
         return;
       }
 
       clickedButton.disabled = true;
-      clickedButton.innerHTML =
-        '<span class="loader"></span>Saving...';
-
-      statusElement.textContent =
-        "Trend sheet me save ho raha hai...";
+      clickedButton.innerHTML = '<span class="loader"></span>Saving...';
+      statusElement.textContent = "Trend sheet me save ho raha hai...";
 
       try {
-        const response =
-          await jsonpRequest(
-            Object.assign(
-              {
-                action: "confirm",
-
-                /*
-                 * Complete textarea input bhejna zaroori hai,
-                 * especially multi-line searches ke liye.
-                 */
-                q: currentSearchText || query,
-
-                confirmationId:
-                  currentConfirmationId
-              },
-              buildPhotoApiParameters()
-            )
-          );
+        const response = await jsonpRequest(
+          Object.assign(
+            {
+              action: "confirm",
+              q: currentSearchText,
+              confirmationId: currentConfirmationId
+            },
+            buildPhotoApiParameters()
+          )
+        );
 
         if (!response.success) {
-          throw new Error(
-            response.message ||
-            "Trend save failed."
-          );
+          throw new Error(response.message || "Trend save fail ho gaya.");
         }
 
         currentSearchConfirmed = true;
-
         clickedButton.disabled = true;
-        clickedButton.textContent =
-          "✓ Saved in Trend";
+        clickedButton.textContent = "✓ Saved in Trend";
 
-        statusElement.textContent =
-          response.alreadySaved
-            ? "Trend sheet me pehle hi save tha."
-            : "Search aur output Trend sheet me successfully save ho gaya.";
+        statusElement.textContent = response.alreadySaved
+          ? "Trend sheet me pehle hi save tha."
+          : "Trend sheet me " + response.savedRows + " row save ho gayi.";
 
-        setMessage(
-          "Result confirmed. Trend sheet me data save ho gaya.",
-          true
-        );
+        setMessage("Result confirm ho gaya.", true);
 
       } catch (error) {
         clickedButton.disabled = false;
-        clickedButton.textContent =
-          "Yes, result sahi hai";
-
-        statusElement.textContent =
-          "Trend save error: " +
-          error.message;
-
-        setMessage(
-          "Trend save error: " +
-          error.message
-        );
+        clickedButton.textContent = "Yes, result sahi hai";
+        statusElement.textContent = "Trend save error: " + error.message;
+        setMessage("Trend save error: " + error.message);
       }
     }
 
-    /**
-     * No button:
-     * Feedback form open karega.
-     */
-    function openFeedbackModal(
-      encodedSearch
-    ) {
-      activeFeedbackSearch =
-        decodeURIComponent(
-          encodedSearch
-        );
+    function openFeedbackModal(searchQuery, prefill) {
+      activeFeedbackSearch = searchQuery || currentSearchText;
 
-      document
-        .getElementById(
-          "feedbackSearchLabel"
-        )
-        .textContent =
-          'Search: "' +
-          activeFeedbackSearch +
-          '"';
+      byId("feedbackSearchLabel").textContent =
+        'Search: "' + activeFeedbackSearch + '"';
 
-      document
-        .getElementById(
-          "expectedBook"
-        )
-        .value = "";
+      byId("expectedBook").value = prefill && prefill.name ? prefill.name : "";
+      byId("expectedSku").value = prefill && prefill.sku ? prefill.sku : "";
+      byId("feedbackNote").value = "";
 
-      document
-        .getElementById(
-          "expectedSku"
-        )
-        .value = "";
+      byId("feedbackModal").classList.add("show");
 
-      document
-        .getElementById(
-          "feedbackNote"
-        )
-        .value = "";
-
-      document
-        .getElementById(
-          "feedbackModal"
-        )
-        .classList
-        .add("show");
-
-      setTimeout(function() {
-        document
-          .getElementById(
-            "expectedBook"
-          )
-          .focus();
+      setTimeout(function () {
+        byId(prefill && prefill.sku ? "feedbackNote" : "expectedBook").focus();
       }, 100);
     }
 
     function closeFeedbackModal() {
-      document
-        .getElementById(
-          "feedbackModal"
-        )
-        .classList
-        .remove("show");
-
+      byId("feedbackModal").classList.remove("show");
       activeFeedbackSearch = "";
     }
 
-    /**
-     * No feedback submit:
-     * Sirf Feedback sheet me save hoga.
-     * Trend me kuch save nahi hoga.
-     */
     async function submitWrongFeedback() {
-      const expectedBook =
-        document
-          .getElementById(
-            "expectedBook"
-          )
-          .value
-          .trim();
+      const expectedBook = byId("expectedBook").value.trim();
+      const expectedSku = byId("expectedSku").value.trim();
+      const note = byId("feedbackNote").value.trim();
+      const button = byId("submitFeedbackButton");
 
-      const expectedSku =
-        document
-          .getElementById(
-            "expectedSku"
-          )
-          .value
-          .trim();
+      if (!activeFeedbackSearch) { return; }
 
-      const note =
-        document
-          .getElementById(
-            "feedbackNote"
-          )
-          .value
-          .trim();
-
-      const button =
-        document.getElementById(
-          "submitFeedbackButton"
-        );
-
-      if (!activeFeedbackSearch) {
-        return;
-      }
-
-      if (
-        !expectedBook &&
-        !expectedSku
-      ) {
-        alert(
-          "Expected book name ya SKU enter karo."
-        );
+      if (!expectedBook && !expectedSku) {
+        setMessage("Book ka naam ya SKU likhna zaroori hai.");
+        byId("expectedBook").focus();
         return;
       }
 
       button.disabled = true;
-      button.innerHTML =
-        '<span class="loader"></span>Saving...';
+      button.innerHTML = '<span class="loader"></span>Saving...';
 
       try {
-        const response =
-          await jsonpRequest(
-            Object.assign(
-              {
-                action: "feedback",
-                feedbackType: "wrong",
-                searchText:
-                  activeFeedbackSearch,
-                expectedBook:
-                  expectedBook,
-                expectedSku:
-                  expectedSku,
-                note: note
-              },
-              buildPhotoApiParameters()
-            )
-          );
+        const response = await jsonpRequest(
+          Object.assign(
+            {
+              action: "feedback",
+              feedbackType: "wrong",
+              searchText: activeFeedbackSearch,
+              expectedBook: expectedBook,
+              expectedSku: expectedSku,
+              note: note
+            },
+            buildPhotoApiParameters()
+          )
+        );
 
         if (!response.success) {
-          throw new Error(
-            response.message ||
-            "Feedback save failed."
-          );
+          throw new Error(response.message || "Feedback save fail ho gaya.");
         }
 
         closeFeedbackModal();
-
-        setMessage(
-          "Feedback sheet me data successfully save ho gaya.",
-          true
-        );
+        setMessage(response.message, true);
 
       } catch (error) {
-        alert(
-          "Feedback error: " +
-          error.message
-        );
+        setMessage("Feedback error: " + error.message);
 
       } finally {
         button.disabled = false;
-        button.textContent =
-          "Submit Feedback";
+        button.textContent = "Submit feedback";
       }
     }
 
-
-    function createPhotoSearchId() {
-      return [
-        "IBA_PHOTO",
-        Date.now(),
-        Math.random().toString(36).substring(2, 12)
-      ].join("_");
-    }
+    /* ============================================================
+     * PHOTO
+     * ============================================================ */
 
     function handlePhotoSelection(event) {
       const files = event.target.files || [];
@@ -1298,103 +1064,45 @@ concept physics"></textarea>
 
       currentPhotoContext = null;
 
-      const processButton =
-        document.getElementById("processPhotoButton");
+      const processButton = byId("processPhotoButton");
+      const searchButton = byId("searchPhotoTextButton");
 
-      const searchButton =
-        document.getElementById("searchPhotoTextButton");
+      processButton.disabled = true;
+      searchButton.disabled = true;
 
-      if (!selectedPhotoFile) {
-        processButton.disabled = true;
-        searchButton.disabled = true;
-        return;
-      }
+      if (!selectedPhotoFile) { return; }
 
       const fileType = String(selectedPhotoFile.type || "");
       const fileName = String(selectedPhotoFile.name || "").toLowerCase();
-      const looksLikeImage =
-        fileType.startsWith("image/") ||
+
+      const looksLikeImage = fileType.indexOf("image/") === 0 ||
         /\.(jpg|jpeg|png|webp|bmp|gif|heic|heif)$/i.test(fileName);
 
       if (!looksLikeImage) {
-        setMessage("Please select a valid image file.");
+        setMessage("Ye image file nahi hai. JPG ya PNG chuno.");
         event.target.value = "";
         selectedPhotoFile = null;
-        processButton.disabled = true;
         return;
       }
 
       if (selectedPhotoFile.size > 15 * 1024 * 1024) {
-        setMessage("Photo size 15 MB se kam honi chahiye.");
+        setMessage("Photo 15 MB se kam honi chahiye.");
         event.target.value = "";
         selectedPhotoFile = null;
-        processButton.disabled = true;
         return;
       }
 
-      selectedPhotoObjectUrl =
-        URL.createObjectURL(selectedPhotoFile);
+      selectedPhotoObjectUrl = URL.createObjectURL(selectedPhotoFile);
+      byId("photoPreview").src = selectedPhotoObjectUrl;
+      byId("photoPreviewWrap").classList.add("show");
+      byId("photoProgress").textContent = "Selected: " + selectedPhotoFile.name;
 
-      const preview =
-        document.getElementById("photoPreview");
-
-      preview.src = selectedPhotoObjectUrl;
-
-      document
-        .getElementById("photoPreviewWrap")
-        .classList.add("show");
-
-      document.getElementById("photoProgress").textContent =
-        "Selected: " + selectedPhotoFile.name;
-
-      document.getElementById("photoOcrText").value = "";
-      document.getElementById("photoBarcode").value = "";
-      document.getElementById("photoFinalQuery").value = "";
+      byId("photoOcrText").value = "";
+      byId("photoBarcode").value = "";
+      byId("photoFinalQuery").value = "";
 
       processButton.disabled = false;
-      searchButton.disabled = true;
-    }
-
-    async function readImageDimensions(imageElement) {
-      if (
-        imageElement &&
-        imageElement.complete &&
-        imageElement.naturalWidth
-      ) {
-        return {
-          width: imageElement.naturalWidth,
-          height: imageElement.naturalHeight
-        };
-      }
-
-      return new Promise(function(resolve, reject) {
-        if (!imageElement) {
-          reject(new Error("Image preview is not available."));
-          return;
-        }
-
-        const previousLoad = imageElement.onload;
-        const previousError = imageElement.onerror;
-
-        imageElement.onload = function(event) {
-          if (typeof previousLoad === "function") {
-            previousLoad.call(imageElement, event);
-          }
-
-          resolve({
-            width: imageElement.naturalWidth || imageElement.width || 0,
-            height: imageElement.naturalHeight || imageElement.height || 0
-          });
-        };
-
-        imageElement.onerror = function(event) {
-          if (typeof previousError === "function") {
-            previousError.call(imageElement, event);
-          }
-
-          reject(new Error("Selected image could not be loaded."));
-        };
-      });
+      setMessage("");
     }
 
     function loadExternalScriptOnce(url, globalTest) {
@@ -1402,26 +1110,24 @@ concept physics"></textarea>
         return Promise.resolve();
       }
 
-      return new Promise(function(resolve, reject) {
-        const existing = Array.from(
-          document.querySelectorAll("script[src]")
-        ).find(function(script) {
-          return script.src === url;
-        });
+      return new Promise(function (resolve, reject) {
+        const existing = Array.prototype.slice
+          .call(document.querySelectorAll("script[src]"))
+          .filter(function (script) { return script.src === url; })[0];
 
         if (existing) {
           const startedAt = Date.now();
 
-          const timer = setInterval(function() {
+          const timer = setInterval(function () {
             if (typeof globalTest === "function" && globalTest()) {
               clearInterval(timer);
               resolve();
               return;
             }
 
-            if (Date.now() - startedAt > 20000) {
+            if (Date.now() - startedAt > 25000) {
               clearInterval(timer);
-              reject(new Error("Required photo library could not be loaded."));
+              reject(new Error("Photo library load nahi hui."));
             }
           }, 150);
 
@@ -1432,16 +1138,13 @@ concept physics"></textarea>
         script.src = url;
         script.async = true;
 
-        script.onload = function() {
-          if (!globalTest || globalTest()) {
-            resolve();
-          } else {
-            reject(new Error("Photo library loaded but did not initialize."));
-          }
+        script.onload = function () {
+          if (!globalTest || globalTest()) { resolve(); }
+          else { reject(new Error("Photo library load hui par chali nahi.")); }
         };
 
-        script.onerror = function() {
-          reject(new Error("Photo library download failed."));
+        script.onerror = function () {
+          reject(new Error("Photo library download fail ho gayi."));
         };
 
         document.head.appendChild(script);
@@ -1450,32 +1153,23 @@ concept physics"></textarea>
 
     async function ensurePhotoLibraries() {
       if (!window.Tesseract) {
-        await loadExternalScriptOnce(
-          "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js",
-          function() {
-            return Boolean(window.Tesseract);
-          }
-        );
+        await loadExternalScriptOnce(TESSERACT_URL, function () {
+          return Boolean(window.Tesseract);
+        });
       }
 
       /*
-       * ZXing is optional because native BarcodeDetector may be available.
-       * Failure here must not stop OCR.
+       * ZXing optional hai — kai browsers me native BarcodeDetector
+       * hota hai. Ye fail ho to OCR phir bhi chalega.
        */
-      if (
-        !("BarcodeDetector" in window) &&
-        (!window.ZXing || !window.ZXing.BrowserMultiFormatReader)
-      ) {
+      const hasNative = "BarcodeDetector" in window;
+      const hasZxing = window.ZXing && window.ZXing.BrowserMultiFormatReader;
+
+      if (!hasNative && !hasZxing) {
         try {
-          await loadExternalScriptOnce(
-            "https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js",
-            function() {
-              return Boolean(
-                window.ZXing &&
-                window.ZXing.BrowserMultiFormatReader
-              );
-            }
-          );
+          await loadExternalScriptOnce(ZXING_URL, function () {
+            return Boolean(window.ZXing && window.ZXing.BrowserMultiFormatReader);
+          });
         } catch (error) {
           console.warn("ZXing unavailable:", error);
         }
@@ -1483,30 +1177,25 @@ concept physics"></textarea>
     }
 
     function fileToImage(file) {
-      return new Promise(function(resolve, reject) {
+      return new Promise(function (resolve, reject) {
         if (!file) {
-          reject(new Error("No image file selected."));
+          reject(new Error("Koi image select nahi hui."));
           return;
         }
 
         const reader = new FileReader();
 
-        reader.onload = function() {
+        reader.onload = function () {
           const image = new Image();
-
-          image.onload = function() {
-            resolve(image);
+          image.onload = function () { resolve(image); };
+          image.onerror = function () {
+            reject(new Error("Ye photo padhi nahi ja rahi."));
           };
-
-          image.onerror = function() {
-            reject(new Error("The selected photo is unreadable."));
-          };
-
           image.src = String(reader.result || "");
         };
 
-        reader.onerror = function() {
-          reject(new Error("Unable to read selected photo."));
+        reader.onerror = function () {
+          reject(new Error("Photo read nahi hui."));
         };
 
         reader.readAsDataURL(file);
@@ -1521,7 +1210,7 @@ concept physics"></textarea>
       const originalHeight = image.naturalHeight || image.height || 0;
 
       if (!originalWidth || !originalHeight) {
-        throw new Error("Photo dimensions could not be detected.");
+        throw new Error("Photo ka size detect nahi hua.");
       }
 
       const scale = Math.min(
@@ -1536,13 +1225,12 @@ concept physics"></textarea>
       originalCanvas.width = width;
       originalCanvas.height = height;
 
-      const originalContext = originalCanvas.getContext(
-        "2d",
-        { willReadFrequently: true }
-      );
+      const originalContext = originalCanvas.getContext("2d", {
+        willReadFrequently: true
+      });
 
       if (!originalContext) {
-        throw new Error("Browser canvas is not available.");
+        throw new Error("Browser canvas available nahi hai.");
       }
 
       originalContext.drawImage(image, 0, 0, width, height);
@@ -1551,13 +1239,12 @@ concept physics"></textarea>
       ocrCanvas.width = width;
       ocrCanvas.height = height;
 
-      const ocrContext = ocrCanvas.getContext(
-        "2d",
-        { willReadFrequently: true }
-      );
+      const ocrContext = ocrCanvas.getContext("2d", {
+        willReadFrequently: true
+      });
 
       if (!ocrContext) {
-        throw new Error("Browser image processing is not available.");
+        throw new Error("Browser image processing available nahi hai.");
       }
 
       ocrContext.drawImage(originalCanvas, 0, 0);
@@ -1565,20 +1252,14 @@ concept physics"></textarea>
       const imageData = ocrContext.getImageData(0, 0, width, height);
       const pixels = imageData.data;
 
-      /*
-       * Grayscale + moderate contrast.
-       * This improves title-page/back-cover OCR while retaining letter edges.
-       */
+      /* Grayscale + halka contrast — OCR ke liye better. */
       for (let i = 0; i < pixels.length; i += 4) {
         const gray =
           pixels[i] * 0.299 +
           pixels[i + 1] * 0.587 +
           pixels[i + 2] * 0.114;
 
-        const contrasted = Math.max(
-          0,
-          Math.min(255, (gray - 128) * 1.45 + 128)
-        );
+        const contrasted = Math.max(0, Math.min(255, (gray - 128) * 1.45 + 128));
 
         pixels[i] = contrasted;
         pixels[i + 1] = contrasted;
@@ -1595,18 +1276,13 @@ concept physics"></textarea>
       };
     }
 
-    async function canvasToImageElement(canvas) {
-      return new Promise(function(resolve, reject) {
+    function canvasToImageElement(canvas) {
+      return new Promise(function (resolve, reject) {
         const image = new Image();
-
-        image.onload = function() {
-          resolve(image);
+        image.onload = function () { resolve(image); };
+        image.onerror = function () {
+          reject(new Error("Processed image ready nahi hui."));
         };
-
-        image.onerror = function() {
-          reject(new Error("Processed image could not be prepared."));
-        };
-
         image.src = canvas.toDataURL("image/jpeg", 0.94);
       });
     }
@@ -1620,18 +1296,12 @@ concept physics"></textarea>
               : [];
 
           const desired = [
-            "ean_13",
-            "ean_8",
-            "upc_a",
-            "upc_e",
-            "code_128",
-            "code_39",
-            "itf",
-            "qr_code"
+            "ean_13", "ean_8", "upc_a", "upc_e",
+            "code_128", "code_39", "itf", "qr_code"
           ];
 
           const formats = supported.length
-            ? desired.filter(function(format) {
+            ? desired.filter(function (format) {
                 return supported.indexOf(format) !== -1;
               })
             : desired;
@@ -1650,10 +1320,7 @@ concept physics"></textarea>
         }
       }
 
-      if (
-        !window.ZXing ||
-        !window.ZXing.BrowserMultiFormatReader
-      ) {
+      if (!window.ZXing || !window.ZXing.BrowserMultiFormatReader) {
         return "";
       }
 
@@ -1666,164 +1333,125 @@ concept physics"></textarea>
         return result && result.getText
           ? String(result.getText() || "").trim()
           : "";
+
       } catch (error) {
         return "";
+
       } finally {
-        if (typeof reader.reset === "function") {
-          reader.reset();
-        }
+        if (typeof reader.reset === "function") { reader.reset(); }
       }
     }
 
+    /**
+     * OCR text ko chhota aur saaf karta hai.
+     * Hindi (Devanagari) lines bhi rakhi jaati hain.
+     */
     function cleanOcrForSearch(value) {
-      const lines = String(value || "")
+      return String(value || "")
         .replace(/\r/g, "\n")
         .replace(/[|¦]/g, "I")
         .replace(/[^\S\n]+/g, " ")
         .split("\n")
-        .map(function(line) {
-          return line
-            .replace(/\s+/g, " ")
-            .trim();
+        .map(function (line) { return line.replace(/\s+/g, " ").trim(); })
+        .filter(function (line) {
+          return line.length >= 2 && /[A-Za-z0-9\u0900-\u097F]/.test(line);
         })
-        .filter(function(line) {
-          return line.length >= 2;
-        })
-        .filter(function(line) {
-          return /[A-Za-z0-9]/.test(line);
-        })
-        .slice(0, 24);
-
-      return lines.join("\n").trim();
+        .slice(0, 20)
+        .join("\n")
+        .trim()
+        .substring(0, 1200);
     }
 
     function normalizePhotoBarcode(value) {
       const raw = String(value || "").trim();
 
-      if (!raw) {
-        return "";
-      }
+      if (!raw) { return ""; }
 
       const digits = raw.replace(/\D/g, "");
 
-      if (
-        digits.length === 10 ||
-        digits.length === 12 ||
-        digits.length === 13
-      ) {
-        return digits;
-      }
-
-      return raw;
+      return (digits.length === 10 || digits.length === 12 || digits.length === 13)
+        ? digits
+        : raw;
     }
 
-    function buildFinalPhotoQuery(ocrText, barcode) {
-      const cleanBarcode = normalizePhotoBarcode(barcode);
+    async function runOcr(canvas, useHindi, progress) {
+      const options = {
+        logger: function (message) {
+          if (message.status === "recognizing text") {
+            progress.textContent = "Text padha ja raha hai: " +
+              Math.round(Number(message.progress || 0) * 100) + "%";
 
-      const usefulLines = cleanOcrForSearch(ocrText)
-        .split("\n")
-        .map(function(line) {
-          return line.trim();
-        })
-        .filter(Boolean)
-        .filter(function(line) {
-          return line.replace(/[^A-Za-z0-9]/g, "").length >= 3;
-        })
-        .slice(0, 10);
+          } else if (message.status) {
+            progress.textContent =
+              String(message.status).replace(/_/g, " ") + "...";
+          }
+        }
+      };
 
-      const queryParts = [];
+      if (useHindi) {
+        try {
+          progress.textContent =
+            "Hindi + English language file load ho rahi hai " +
+            "(pehli baar me time lagta hai)...";
 
-      if (cleanBarcode) {
-        queryParts.push(cleanBarcode);
+          return await window.Tesseract.recognize(canvas, "eng+hin", options);
+
+        } catch (error) {
+          /* Hindi file fail ho to English se kaam chalao. */
+          console.warn("Hindi OCR failed, English par ja rahe hain:", error);
+          progress.textContent = "Hindi file load nahi hui, English se padh rahe hain...";
+        }
       }
 
-      if (usefulLines.length) {
-        queryParts.push(usefulLines.join(" "));
-      }
-
-      return queryParts
-        .join(" ")
-        .replace(/\s+/g, " ")
-        .trim()
-        .substring(0, 1200);
+      return await window.Tesseract.recognize(canvas, "eng", options);
     }
 
     async function processSelectedPhoto() {
       if (!selectedPhotoFile) {
-        setMessage("Please select a book photo first.");
+        setMessage("Pehle book ki photo select karo.");
         return;
       }
 
-      const processButton =
-        document.getElementById("processPhotoButton");
-
-      const progress =
-        document.getElementById("photoProgress");
+      const processButton = byId("processPhotoButton");
+      const progress = byId("photoProgress");
 
       processButton.disabled = true;
-      processButton.innerHTML =
-        '<span class="loader"></span>Preparing Photo...';
-
-      document.getElementById("searchPhotoTextButton").disabled = true;
+      processButton.innerHTML = '<span class="loader"></span>Photo ready ho rahi hai...';
+      byId("searchPhotoTextButton").disabled = true;
       setMessage("");
 
       try {
-        progress.textContent = "Loading OCR and barcode tools...";
-
+        progress.textContent = "OCR aur barcode tools load ho rahe hain...";
         await ensurePhotoLibraries();
 
-        progress.textContent = "Preparing and improving photo...";
+        progress.textContent = "Photo improve ki ja rahi hai...";
+        const prepared = await createPhotoProcessingCanvases(selectedPhotoFile);
 
-        const prepared =
-          await createPhotoProcessingCanvases(selectedPhotoFile);
+        progress.textContent = "Barcode check ho raha hai...";
+        const barcodePromise = detectBarcodeFromCanvas(prepared.originalCanvas);
 
-        progress.textContent = "Checking barcode / ISBN...";
+        const useHindi = byId("photoHindiToggle").checked;
+        const ocrResult = await runOcr(prepared.ocrCanvas, useHindi, progress);
 
-        const barcodePromise =
-          detectBarcodeFromCanvas(prepared.originalCanvas);
+        let barcode = "";
 
-        progress.textContent = "Starting OCR...";
-
-        const ocrResult = await window.Tesseract.recognize(
-          prepared.ocrCanvas,
-          "eng",
-          {
-            logger: function(message) {
-              if (message.status === "recognizing text") {
-                progress.textContent =
-                  "Reading text: " +
-                  Math.round(Number(message.progress || 0) * 100) +
-                  "%";
-              } else if (message.status) {
-                progress.textContent =
-                  String(message.status)
-                    .replace(/_/g, " ") +
-                  "...";
-              }
-            }
-          }
-        );
-
-        const barcode = await barcodePromise;
+        try {
+          barcode = normalizePhotoBarcode(await barcodePromise);
+        } catch (error) {
+          console.warn("Barcode detect failed:", error);
+        }
 
         const ocrText = cleanOcrForSearch(
-          ocrResult && ocrResult.data
-            ? ocrResult.data.text
-            : ""
+          ocrResult && ocrResult.data ? ocrResult.data.text : ""
         );
 
-        const finalQuery = buildFinalPhotoQuery(
-          ocrText,
-          barcode
-        );
-
-        document.getElementById("photoOcrText").value = ocrText;
-        document.getElementById("photoBarcode").value = barcode;
-        document.getElementById("photoFinalQuery").value = finalQuery;
+        byId("photoOcrText").value = ocrText;
+        byId("photoBarcode").value = barcode;
+        byId("photoFinalQuery").value = "";
 
         currentPhotoContext = {
           searchType: "photo",
-          photoSearchId: createPhotoSearchId(),
+          photoSearchId: createId("IBA_PHOTO"),
           photoFileName: selectedPhotoFile.name || "camera-photo",
           photoFileType: selectedPhotoFile.type || "",
           photoFileSize: selectedPhotoFile.size || 0,
@@ -1831,76 +1459,54 @@ concept physics"></textarea>
           photoHeight: prepared.originalHeight,
           ocrText: ocrText,
           barcode: barcode,
-          finalQuery: finalQuery
+          finalQuery: ""
         };
 
-        document.getElementById("searchPhotoTextButton").disabled =
-          !finalQuery;
-
-        if (!finalQuery) {
-          progress.textContent =
-            "Photo processed, but readable text/barcode was not found.";
-
+        if (!ocrText && !barcode) {
+          progress.textContent = "Photo process ho gayi, par koi text nahi mila.";
           setMessage(
-            "Readable text nahi mila. Clear title page/back cover photo try karein, ya OCR text manually type karein."
+            "Text nahi mila. Title page ya cover ki clear, seedhi photo lo — " +
+            "ya naam khud type kar do."
           );
-
           return;
         }
 
-        progress.textContent = barcode
-          ? "Photo ready. Barcode and text detected."
-          : "Photo ready. Text detected; barcode not found.";
+        byId("searchPhotoTextButton").disabled = false;
 
-        /*
-         * Auto-search only after OCR has completed successfully.
-         */
+        progress.textContent = barcode
+          ? "Text aur barcode mil gaya. Search kar rahe hain..."
+          : "Text mil gaya. Search kar rahe hain...";
+
         await searchUsingPhotoText();
 
       } catch (error) {
         console.error(error);
-
-        progress.textContent = "Photo processing failed.";
-
-        setMessage(
-          "Photo search error: " +
-          (error && error.message
-            ? error.message
-            : String(error))
-        );
+        progress.textContent = "Photo process nahi hui.";
+        setMessage("Photo search error: " +
+          (error && error.message ? error.message : String(error)));
 
       } finally {
         processButton.disabled = false;
-        processButton.textContent = "Read Photo & Search";
+        processButton.textContent = "Read photo & search";
       }
     }
 
     async function searchUsingPhotoText() {
-      const ocrText =
-        document.getElementById("photoOcrText").value.trim();
+      const ocrText = byId("photoOcrText").value.trim();
+      const barcode = byId("photoBarcode").value.trim();
+      const manualQuery = byId("photoFinalQuery").value.trim();
 
-      const barcode =
-        document.getElementById("photoBarcode").value.trim();
-
-      let finalQuery =
-        document.getElementById("photoFinalQuery").value.trim();
-
-      if (!finalQuery) {
-        finalQuery = buildFinalPhotoQuery(ocrText, barcode);
-        document.getElementById("photoFinalQuery").value = finalQuery;
-      }
-
-      if (!finalQuery) {
-        setMessage("Detected OCR text ya barcode enter karein.");
+      if (!ocrText && !barcode && !manualQuery) {
+        setMessage("OCR text, barcode ya book ka naam bharo.");
         return;
       }
 
-      const preview = document.getElementById("photoPreview");
+      const preview = byId("photoPreview");
 
       if (!currentPhotoContext) {
         currentPhotoContext = {
           searchType: "photo",
-          photoSearchId: createPhotoSearchId(),
+          photoSearchId: createId("IBA_PHOTO"),
           photoFileName: selectedPhotoFile ? selectedPhotoFile.name : "",
           photoFileType: selectedPhotoFile ? selectedPhotoFile.type : "",
           photoFileSize: selectedPhotoFile ? selectedPhotoFile.size : "",
@@ -1911,11 +1517,38 @@ concept physics"></textarea>
 
       currentPhotoContext.ocrText = ocrText;
       currentPhotoContext.barcode = barcode;
-      currentPhotoContext.finalQuery = finalQuery;
 
-      document.getElementById("searchInput").value = finalQuery;
+      /*
+       * Backend khud OCR se book ka naam nikaalta hai.
+       * Agar tumne "Nikala gaya book name" khud bhar diya hai to
+       * wahi use hoga.
+       */
+      const queryForBackend = manualQuery || ocrText || barcode;
+
+      currentPhotoContext.finalQuery = queryForBackend;
+      byId("searchInput").value = queryForBackend;
 
       await runSearch("photo");
+    }
+
+    function clearPhotoSearch() {
+      if (selectedPhotoObjectUrl) {
+        URL.revokeObjectURL(selectedPhotoObjectUrl);
+        selectedPhotoObjectUrl = "";
+      }
+
+      selectedPhotoFile = null;
+      currentPhotoContext = null;
+
+      byId("photoInput").value = "";
+      byId("photoPreview").removeAttribute("src");
+      byId("photoPreviewWrap").classList.remove("show");
+      byId("photoProgress").textContent = "";
+      byId("photoOcrText").value = "";
+      byId("photoBarcode").value = "";
+      byId("photoFinalQuery").value = "";
+      byId("processPhotoButton").disabled = true;
+      byId("searchPhotoTextButton").disabled = true;
     }
 
     function getTopCurrentResult() {
@@ -1923,14 +1556,9 @@ concept physics"></textarea>
         ? currentLastSearchResults
         : [];
 
-      for (let groupIndex = 0; groupIndex < groups.length; groupIndex++) {
-        const matches = Array.isArray(groups[groupIndex].matches)
-          ? groups[groupIndex].matches
-          : [];
-
-        if (matches.length) {
-          return matches[0];
-        }
+      for (let index = 0; index < groups.length; index++) {
+        const matches = groups[index].matches || [];
+        if (matches.length) { return matches[0]; }
       }
 
       return null;
@@ -1940,19 +1568,13 @@ concept physics"></textarea>
       return (Array.isArray(currentLastSearchResults)
         ? currentLastSearchResults
         : []
-      ).reduce(function(total, group) {
-        return total + (
-          Array.isArray(group.matches)
-            ? group.matches.length
-            : 0
-        );
+      ).reduce(function (total, group) {
+        return total + ((group.matches || []).length);
       }, 0);
     }
 
     function buildPhotoApiParameters() {
-      if (!currentPhotoContext) {
-        return {};
-      }
+      if (!currentPhotoContext) { return {}; }
 
       const top = getTopCurrentResult();
 
@@ -1977,189 +1599,82 @@ concept physics"></textarea>
       };
     }
 
-    function clearPhotoSearch() {
-      if (selectedPhotoObjectUrl) {
-        URL.revokeObjectURL(selectedPhotoObjectUrl);
-        selectedPhotoObjectUrl = "";
-      }
-
-      selectedPhotoFile = null;
-      currentPhotoContext = null;
-
-      document.getElementById("photoInput").value = "";
-      document.getElementById("photoPreview").removeAttribute("src");
-      document.getElementById("photoPreviewWrap").classList.remove("show");
-      document.getElementById("photoProgress").textContent = "";
-      document.getElementById("photoOcrText").value = "";
-      document.getElementById("photoBarcode").value = "";
-      document.getElementById("photoFinalQuery").value = "";
-      document.getElementById("processPhotoButton").disabled = true;
-      document.getElementById("searchPhotoTextButton").disabled = true;
-    }
+    /* ============================================================
+     * VOICE
+     * ============================================================ */
 
     function setupVoiceRecognition() {
       const SpeechRecognition =
-        window.SpeechRecognition ||
-        window.webkitSpeechRecognition;
+        window.SpeechRecognition || window.webkitSpeechRecognition;
 
-      if (!SpeechRecognition) {
-        return false;
-      }
+      if (!SpeechRecognition) { return false; }
 
-      recognition =
-        new SpeechRecognition();
+      recognition = new SpeechRecognition();
 
-      recognition.lang = "en-IN";
+      /* hi-IN Hindi bolne par bhi Devanagari text deta hai. */
+      recognition.lang = "hi-IN";
       recognition.continuous = false;
       recognition.interimResults = true;
       recognition.maxAlternatives = 3;
 
-      recognition.onstart = function() {
+      recognition.onstart = function () {
         voiceRunning = true;
-
-        document
-          .getElementById(
-            "voiceButton"
-          )
-          .disabled = true;
-
-        document
-          .getElementById(
-            "stopVoiceButton"
-          )
-          .disabled = false;
-
-        setMessage(
-          "Listening...",
-          true
-        );
+        byId("voiceButton").disabled = true;
+        byId("stopVoiceButton").disabled = false;
+        setMessage("Sun raha hu... bolo.", true);
       };
 
-      recognition.onresult = function(
-        event
-      ) {
+      recognition.onresult = function (event) {
         let transcript = "";
 
-        for (
-          let index =
-            event.resultIndex;
-          index <
-            event.results.length;
-          index++
-        ) {
-          transcript +=
-            event.results[index][0]
-              .transcript + " ";
+        for (let index = event.resultIndex; index < event.results.length; index++) {
+          transcript += event.results[index][0].transcript + " ";
         }
 
-        document
-          .getElementById(
-            "searchInput"
-          )
-          .value =
-            transcript.trim();
+        byId("searchInput").value = transcript.trim();
       };
 
-      recognition.onerror = function(
-        event
-      ) {
-        setMessage(
-          "Voice error: " +
-          event.error
-        );
+      recognition.onerror = function (event) {
+        setMessage("Voice error: " + event.error);
       };
 
-      recognition.onend = function() {
+      recognition.onend = function () {
         voiceRunning = false;
+        byId("voiceButton").disabled = false;
+        byId("stopVoiceButton").disabled = true;
 
-        document
-          .getElementById(
-            "voiceButton"
-          )
-          .disabled = false;
-
-        document
-          .getElementById(
-            "stopVoiceButton"
-          )
-          .disabled = true;
-
-        const text =
-          document
-            .getElementById(
-              "searchInput"
-            )
-            .value
-            .trim();
-
-        if (text) {
-          runSearch();
-        }
+        if (byId("searchInput").value.trim()) { runSearch(); }
       };
 
       return true;
     }
 
     function startVoiceSearch() {
-      if (!recognition) {
-        const supported =
-          setupVoiceRecognition();
-
-        if (!supported) {
-          setMessage(
-            "Voice recognition is not supported in this browser."
-          );
-          return;
-        }
-      }
-
-      if (voiceRunning) {
+      if (!recognition && !setupVoiceRecognition()) {
+        setMessage("Is browser me voice search support nahi hai.");
         return;
       }
 
-      document
-        .getElementById(
-          "searchInput"
-        )
-        .value = "";
+      if (voiceRunning) { return; }
+
+      byId("searchInput").value = "";
 
       try {
         recognition.start();
       } catch (error) {
-        setMessage(
-          "Voice Search dobara click karne se pehle ek second wait karo."
-        );
+        setMessage("Ek second ruk kar dobara Voice search dabao.");
       }
     }
 
     function stopVoiceSearch() {
-      if (
-        recognition &&
-        voiceRunning
-      ) {
-        recognition.stop();
-      }
+      if (recognition && voiceRunning) { recognition.stop(); }
     }
 
     function clearSearch() {
-      if (
-        recognition &&
-        voiceRunning
-      ) {
-        recognition.stop();
-      }
+      if (recognition && voiceRunning) { recognition.stop(); }
 
-      document
-        .getElementById(
-          "searchInput"
-        )
-        .value = "";
-
-      document
-        .getElementById(
-          "results"
-        )
-        .innerHTML = "";
+      byId("searchInput").value = "";
+      byId("results").innerHTML = "";
 
       currentSearchText = "";
       currentConfirmationId = "";
@@ -2170,7 +1685,75 @@ concept physics"></textarea>
       setMessage("");
     }
 
-    loadDatabaseInfo();
+    /* ============================================================
+     * EVENT WIRING
+     *
+     * Sab kuch addEventListener se juda hai. V3 me inline onclick
+     * tha, jisme apostrophe wali search ("it's") Yes/No buttons
+     * ko tod deti thi.
+     * ============================================================ */
+
+    byId("searchButton").addEventListener("click", function () { runSearch(); });
+    byId("voiceButton").addEventListener("click", startVoiceSearch);
+    byId("stopVoiceButton").addEventListener("click", stopVoiceSearch);
+    byId("clearButton").addEventListener("click", clearSearch);
+
+    byId("refreshButton").addEventListener("click", function () {
+      loadDatabaseInfo(true);
+    });
+
+    byId("photoInput").addEventListener("change", handlePhotoSelection);
+    byId("processPhotoButton").addEventListener("click", processSelectedPhoto);
+    byId("clearPhotoButton").addEventListener("click", clearPhotoSearch);
+
+    byId("searchPhotoTextButton").addEventListener("click", function () {
+      searchUsingPhotoText();
+    });
+
+    byId("submitFeedbackButton").addEventListener("click", submitWrongFeedback);
+    byId("cancelFeedbackButton").addEventListener("click", closeFeedbackModal);
+
+    byId("feedbackModal").addEventListener("click", function (event) {
+      if (event.target === this) { closeFeedbackModal(); }
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") { closeFeedbackModal(); }
+    });
+
+    /* Result cards ke buttons — ek hi listener sab ke liye. */
+    byId("results").addEventListener("click", function (event) {
+      const button = event.target.closest("button[data-action]");
+
+      if (!button) { return; }
+
+      const action = button.getAttribute("data-action");
+      const queryIndex = Number(button.getAttribute("data-index"));
+
+      if (action === "confirm") {
+        confirmRelevantResult(queryIndex, button);
+
+      } else if (action === "reject") {
+        const group = currentLastSearchResults[queryIndex];
+        openFeedbackModal(group ? group.query : currentSearchText, null);
+
+      } else if (action === "pick") {
+        openFeedbackModal(currentSearchText, {
+          sku: button.getAttribute("data-sku"),
+          name: button.getAttribute("data-name")
+        });
+      }
+    });
+
+    /* Ctrl/Cmd + Enter se search. */
+    byId("searchInput").addEventListener("keydown", function (event) {
+      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+        event.preventDefault();
+        runSearch();
+      }
+    });
+
+    loadDatabaseInfo(false);
   </script>
 </body>
 </html>
