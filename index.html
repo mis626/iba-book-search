@@ -1354,7 +1354,7 @@ concept physics"></textarea>
         .split("\n")
         .map(function (line) { return line.replace(/\s+/g, " ").trim(); })
         .filter(function (line) {
-          return line.length >= 2 && /[A-Za-z0-9\u0900-\u097F]/.test(line);
+          return line.length >= 2 && /[A-Za-z0-9ऀ-ॿ]/.test(line);
         })
         .slice(0, 20)
         .join("\n")
